@@ -266,7 +266,7 @@ notificationSchema.statics.findScheduled = function (beforeDate?: Date) {
 notificationSchema.statics.findForRetry = function () {
   return this.find({
     isDelivered: false,
-    retryCount: { $lt: this.maxRetries },
+    retryCount: { $lt: 3 },
     scheduledFor: { $lte: new Date() },
   })
     .sort({ priority: -1, createdAt: 1 })
@@ -309,7 +309,7 @@ notificationSchema.methods.markAsFailed = function (channel?: string) {
 
 // Método para verificar se deve tentar novamente
 notificationSchema.methods.shouldRetry = function (): boolean {
-  return this.retryCount < this.maxRetries && !this.isDelivered;
+  return this.retryCount < 3 && !this.isDelivered;
 };
 
 // Método estático para criar notificação de alimentação

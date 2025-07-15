@@ -204,7 +204,7 @@ export const requirePetOwnership = async (
     }
 
     // Adicionar pet ao request para uso posterior
-    req.pet = pet;
+    (req as any).pet = pet;
     
     next();
   } catch (error) {

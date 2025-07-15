@@ -17,7 +17,6 @@ const mongooseOptions = {
   
   // Configurações de buffer
   bufferCommands: false,
-  bufferMaxEntries: 0,
 };
 
 export const connectDatabase = async (): Promise<void> => {
