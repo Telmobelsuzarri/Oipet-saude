@@ -42,6 +42,25 @@ if (process.env.NODE_ENV !== 'production') {
 // Try to start the TypeScript server
 try {
   console.log('📦 Loading TypeScript server...');
+  
+  // Register ts-node for production
+  require('ts-node').register({
+    transpileOnly: true,
+    compilerOptions: {
+      module: 'commonjs',
+      target: 'es2020',
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+      skipLibCheck: true,
+      strict: false,
+      noImplicitAny: false,
+      resolveJsonModule: true,
+      experimentalDecorators: true,
+      emitDecoratorMetadata: true
+    }
+  });
+  
+  require('tsconfig-paths/register');
   require('./src/index.ts');
 } catch (error) {
   console.error('❌ Failed to start TypeScript server:', error.message);

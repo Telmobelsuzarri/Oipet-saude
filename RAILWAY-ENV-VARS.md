@@ -28,6 +28,9 @@ NODE_ENV=production
 # Database - MongoDB Atlas
 MONGODB_URI=mongodb+srv://telmobelsuzarri:oipet2025@cluster0.5vmh6ki.mongodb.net/oipet-saude?retryWrites=true&w=majority&appName=Cluster0
 
+# Redis - Railway Plugin
+REDIS_URL=redis://default:@redis-production-2ea3.up.railway.app:6379
+
 # JWT - Use as chaves geradas abaixo
 JWT_SECRET=825e4b217ff32cdb16868491caca7291ce56c9ad48e931a4057eed0c0ea9887b4bb2eb193b5909dd8bce1a052de69ced35d7ceb0c8ae2a3f5f6488f56ba8e3fc
 JWT_REFRESH_SECRET=70e89c85079bf10531330d854df99308485091f53cea198767be2487b603c9aed76cf0e3aa9dfc53e0701ec729705b442431ff1009e194807be10c7688bf2c0f
