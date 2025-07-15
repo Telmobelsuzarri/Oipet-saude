@@ -23,7 +23,7 @@ Cole estas variáveis no Railway Dashboard > Variables:
 ```bash
 # Application
 NODE_ENV=production
-PORT=$PORT
+# PORT é automaticamente fornecida pelo Railway, não precisa configurar
 
 # Database - MongoDB Atlas
 MONGODB_URI=mongodb+srv://telmobelsuzarri:oipet2025@cluster0.5vmh6ki.mongodb.net/oipet-saude?retryWrites=true&w=majority&appName=Cluster0

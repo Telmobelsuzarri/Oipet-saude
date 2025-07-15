@@ -29,7 +29,7 @@ import adminRoutes from '@/routes/admin';
 dotenv.config();
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT || '3001', 10);
 
 // Middlewares de segurança
 app.use(helmet({
