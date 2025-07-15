@@ -1,0 +1,118 @@
+/* OiPet Logo Component CSS */
+.oipet-logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  gap: 8px;
+}
+
+.oipet-logo-image {
+  border-radius: 8px;
+  object-fit: contain;
+}
+
+.oipet-logo-text {
+  font-weight: bold;
+  color: #E85A5A; /* Coral oficial */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  letter-spacing: 0.5px;
+}
+
+/* Tamanhos */
+.oipet-logo-small .oipet-logo-image {
+  width: 40px;
+  height: 40px;
+}
+
+.oipet-logo-small .oipet-logo-text {
+  font-size: 16px;
+}
+
+.oipet-logo-medium .oipet-logo-image {
+  width: 60px;
+  height: 60px;
+}
+
+.oipet-logo-medium .oipet-logo-text {
+  font-size: 20px;
+}
+
+.oipet-logo-large .oipet-logo-image {
+  width: 80px;
+  height: 80px;
+}
+
+.oipet-logo-large .oipet-logo-text {
+  font-size: 24px;
+}
+
+.oipet-logo-xlarge .oipet-logo-image {
+  width: 120px;
+  height: 120px;
+}
+
+.oipet-logo-xlarge .oipet-logo-text {
+  font-size: 32px;
+}
+
+/* Variante White */
+.oipet-logo-white .oipet-logo-image {
+  filter: brightness(0) invert(1);
+}
+
+.oipet-logo-white .oipet-logo-text {
+  color: #FFFFFF;
+}
+
+/* Glass Effect */
+.oipet-logo-glass {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.oipet-logo-glass:hover {
+  background: rgba(255, 255, 255, 0.15);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.16);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .oipet-logo-container {
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .oipet-logo-xlarge .oipet-logo-image {
+    width: 80px;
+    height: 80px;
+  }
+  
+  .oipet-logo-xlarge .oipet-logo-text {
+    font-size: 24px;
+  }
+}
+
+/* Animações */
+@keyframes logoGlow {
+  0% {
+    box-shadow: 0 8px 32px rgba(232, 90, 90, 0.2);
+  }
+  50% {
+    box-shadow: 0 8px 32px rgba(232, 90, 90, 0.4);
+  }
+  100% {
+    box-shadow: 0 8px 32px rgba(232, 90, 90, 0.2);
+  }
+}
+
+.oipet-logo-glass.animated {
+  animation: logoGlow 2s ease-in-out infinite;
+}

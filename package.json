@@ -1,0 +1,75 @@
+{
+  "name": "oipet-saude",
+  "version": "1.0.0",
+  "description": "OiPet Saúde - Aplicativo multiplataforma de gestão de saúde e alimentação para pets",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "mobile",
+    "web",
+    "admin",
+    "shared"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:backend && npm run install:mobile && npm run install:web && npm run install:admin",
+    "install:backend": "cd backend && npm install",
+    "install:mobile": "cd mobile && npm install",
+    "install:web": "cd web && npm install",
+    "install:admin": "cd admin && npm install",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:web\"",
+    "dev:backend": "cd backend && npm run dev",
+    "dev:mobile": "cd mobile && npm run start",
+    "dev:web": "cd web && npm run dev",
+    "dev:admin": "cd admin && npm run dev",
+    "build": "npm run build:backend && npm run build:web && npm run build:admin",
+    "build:backend": "cd backend && npm run build",
+    "build:web": "cd web && npm run build",
+    "build:admin": "cd admin && npm run build",
+    "test": "npm run test:backend && npm run test:web && npm run test:admin",
+    "test:backend": "cd backend && npm run test",
+    "test:mobile": "cd mobile && npm run test",
+    "test:web": "cd web && npm run test",
+    "test:admin": "cd admin && npm run test",
+    "lint": "npm run lint:backend && npm run lint:web && npm run lint:admin",
+    "lint:backend": "cd backend && npm run lint",
+    "lint:web": "cd web && npm run lint",
+    "lint:admin": "cd admin && npm run lint",
+    "clean": "rm -rf node_modules && rm -rf */node_modules && rm -rf */dist && rm -rf */build"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.0",
+    "husky": "^8.0.3",
+    "lint-staged": "^13.2.3",
+    "prettier": "^3.0.0"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "lint-staged": {
+    "*.{js,jsx,ts,tsx}": [
+      "prettier --write",
+      "eslint --fix"
+    ],
+    "*.{json,md}": [
+      "prettier --write"
+    ]
+  },
+  "keywords": [
+    "oipet",
+    "pets",
+    "saude",
+    "alimentacao",
+    "react-native",
+    "nodejs",
+    "mongodb",
+    "railway"
+  ],
+  "author": "Equipe OiPet",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Telmobelsuzarri/oipet-saude"
+  }
+}
