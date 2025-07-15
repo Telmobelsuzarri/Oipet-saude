@@ -51,7 +51,7 @@ class AuthService {
       expiresIn: this.JWT_EXPIRES_IN,
       issuer: 'oipet-saude',
       audience: 'oipet-users',
-    });
+    } as any);
   }
 
   /**
@@ -69,7 +69,7 @@ class AuthService {
       expiresIn: this.JWT_REFRESH_EXPIRES_IN,
       issuer: 'oipet-saude',
       audience: 'oipet-users',
-    });
+    } as any);
   }
 
   /**

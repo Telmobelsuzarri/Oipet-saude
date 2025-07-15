@@ -26,7 +26,7 @@ NODE_ENV=production
 PORT=$PORT
 
 # Database - MongoDB Atlas
-MONGODB_URI=mongodb+srv://oipet-user:SUA_SENHA@oipet-saude.xxxxx.mongodb.net/oipet-saude?retryWrites=true&w=majority
+MONGODB_URI=mongodb+srv://telmobelsuzarri:oipet2025@cluster0.5vmh6ki.mongodb.net/oipet-saude?retryWrites=true&w=majority&appName=Cluster0
 
 # JWT - Use as chaves geradas abaixo
 JWT_SECRET=825e4b217ff32cdb16868491caca7291ce56c9ad48e931a4057eed0c0ea9887b4bb2eb193b5909dd8bce1a052de69ced35d7ceb0c8ae2a3f5f6488f56ba8e3fc
