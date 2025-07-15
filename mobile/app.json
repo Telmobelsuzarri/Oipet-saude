@@ -1,0 +1,85 @@
+{
+  "expo": {
+    "name": "OiPet Saúde",
+    "slug": "oipet-saude",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#E85A5A"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.oipet.saude",
+      "buildNumber": "1.0.0",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Este app usa a câmera para escanear alimentos e registrar fotos dos pets",
+        "NSPhotoLibraryUsageDescription": "Este app acessa a galeria para selecionar fotos dos pets"
+      }
+    },
+    "android": {
+      "package": "com.oipet.saude",
+      "versionCode": 1,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#E85A5A"
+      },
+      "permissions": [
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE",
+        "WRITE_EXTERNAL_STORAGE",
+        "NOTIFICATIONS"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png",
+      "name": "OiPet Saúde",
+      "shortName": "OiPet",
+      "lang": "pt-BR",
+      "scope": "/",
+      "themeColor": "#E85A5A",
+      "backgroundColor": "#FFFFFF"
+    },
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#E85A5A",
+      "iosDisplayInForeground": true,
+      "androidMode": "default",
+      "androidCollapsedTitle": "#{unread_notifications} novas notificações"
+    },
+    "plugins": [
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#E85A5A",
+          "defaultChannel": "default"
+        }
+      ],
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Permitir que $(PRODUCT_NAME) acesse sua câmera para escanear alimentos"
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "O app acessa fotos para permitir que você selecione imagens dos seus pets"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "oipet-saude-mobile"
+      }
+    },
+    "scheme": "oipet-saude"
+  }
+}
