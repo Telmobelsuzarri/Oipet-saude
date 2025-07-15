@@ -23,6 +23,7 @@ import authRoutes from '@/routes/auth';
 import userRoutes from '@/routes/users';
 import petRoutes from '@/routes/pets';
 import healthRoutes from '@/routes/health';
+import notificationRoutes from '@/routes/notifications';
 import adminRoutes from '@/routes/admin';
 
 // Configurar dotenv
@@ -89,6 +90,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/pets', petRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/notifications', notificationRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Documentação Swagger
