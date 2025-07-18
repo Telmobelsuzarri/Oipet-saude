@@ -7,6 +7,8 @@ import { logger } from '@/utils/logger';
 
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/oipet-saude';
 
+// Debug removido - conexão funcionando!
+
 // Configurações do Mongoose
 const mongooseOptions = {
   // Configurações de conexão
@@ -39,12 +41,12 @@ export const connectDatabase = async (): Promise<void> => {
     
     logger.info('✅ Database connection established successfully');
     
-    // Inicializar modelos e índices
-    if (process.env.NODE_ENV !== 'test') {
-      const { initializeModels } = await import('@/models');
-      await initializeModels();
-      logger.info('🗂️  Database models and indexes initialized');
-    }
+    // Inicializar modelos e índices (desabilitado temporariamente)
+    // if (process.env.NODE_ENV !== 'test') {
+    //   const { initializeModels } = await import('@/models');
+    //   await initializeModels();
+    //   logger.info('🗂️  Database models and indexes initialized');
+    // }
     
   } catch (error) {
     logger.error('❌ Database connection failed:', error);

@@ -18,8 +18,14 @@ import { LoginScreen } from '@/screens/auth/LoginScreen';
 import { RegisterScreen } from '@/screens/auth/RegisterScreen';
 import { HomeScreen } from '@/screens/main/HomeScreen';
 import { PetsScreen } from '@/screens/pets/PetsScreen';
+import { AddPetScreen } from '@/screens/pets/AddPetScreen';
+import { EditPetScreen } from '@/screens/pets/EditPetScreen';
+import { PetDetailScreen } from '@/screens/pets/PetDetailScreen';
 import { HealthScreen } from '@/screens/health/HealthScreen';
+import { AddHealthRecordScreen } from '@/screens/health/AddHealthRecordScreen';
+import { PetHealthHistoryScreen } from '@/screens/health/PetHealthHistoryScreen';
 import { NotificationsScreen } from '@/screens/notifications/NotificationsScreen';
+import { DashboardScreen } from '@/screens/dashboard/DashboardScreen';
 import { ProfileScreen } from '@/screens/profile/ProfileScreen';
 
 // Types
@@ -166,7 +172,15 @@ const Navigation = () => {
           </>
         ) : (
           /* Main App Stack - se estiver autenticado */
-          <Stack.Screen name="Main" component={MainTabNavigator} />
+          <>
+            <Stack.Screen name="Main" component={MainTabNavigator} />
+            <Stack.Screen name="AddPet" component={AddPetScreen} />
+            <Stack.Screen name="EditPet" component={EditPetScreen} />
+            <Stack.Screen name="PetDetail" component={PetDetailScreen} />
+            <Stack.Screen name="AddHealthRecord" component={AddHealthRecordScreen} />
+            <Stack.Screen name="PetHealthHistory" component={PetHealthHistoryScreen} />
+            <Stack.Screen name="Dashboard" component={DashboardScreen} />
+          </>
         )}
       </Stack.Navigator>
     </NavigationContainer>

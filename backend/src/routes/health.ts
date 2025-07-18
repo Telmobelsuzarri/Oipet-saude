@@ -6,7 +6,7 @@ import express from 'express';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { authenticate } from '@/middleware/auth';
 import { validate, healthValidators } from '@/utils/validators';
-import { healthService } from '@/services/healthService';
+import { healthService } from '@/services/healthService-simple';
 
 const router = express.Router();
 

@@ -31,6 +31,11 @@
     "test:mobile": "cd mobile && npm run test",
     "test:web": "cd web && npm run test",
     "test:admin": "cd admin && npm run test",
+    "test:integration": "node integration-test.js",
+    "test:platforms": "node -e \"require('./integration-test.js').testPlatformIntegration('https://oipet-saude-production.up.railway.app/api', 'Production')\"",
+    "test:sync": "node -e \"require('./integration-test.js').testCrossPlatformDataSync()\"",
+    "test:cross-platform": "node test-cross-platform.js",
+    "test:connection": "node simple-connection-test.js",
     "lint": "npm run lint:backend && npm run lint:web && npm run lint:admin",
     "lint:backend": "cd backend && npm run lint",
     "lint:web": "cd web && npm run lint",
@@ -38,6 +43,8 @@
     "clean": "rm -rf node_modules && rm -rf */node_modules && rm -rf */dist && rm -rf */build"
   },
   "devDependencies": {
+    "axios": "^1.6.0",
+    "chalk": "^4.1.2",
     "concurrently": "^8.2.0",
     "husky": "^8.0.3",
     "lint-staged": "^13.2.3",

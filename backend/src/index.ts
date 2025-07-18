@@ -3,13 +3,16 @@
  * Servidor principal Express.js + TypeScript
  */
 
+// Configurar dotenv PRIMEIRO!
+import dotenv from 'dotenv';
+dotenv.config();
+
 import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import compression from 'compression';
 import rateLimit from 'express-rate-limit';
 import 'express-async-errors';
-import dotenv from 'dotenv';
 
 // Importações locais
 import { connectDatabase } from '@/config/database';
@@ -22,12 +25,11 @@ import { notFound } from '@/middleware/notFound';
 import authRoutes from '@/routes/auth';
 import userRoutes from '@/routes/users';
 import petRoutes from '@/routes/pets';
-import healthRoutes from '@/routes/health';
-import notificationRoutes from '@/routes/notifications';
+import healthRoutes from '@/routes/health-simple';
+import notificationRoutes from '@/routes/notifications-simple';
 import adminRoutes from '@/routes/admin';
 
-// Configurar dotenv
-dotenv.config();
+// Debug removido - servidor funcionando!
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);

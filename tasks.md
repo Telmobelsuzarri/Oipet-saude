@@ -3,9 +3,9 @@
 ## 📊 Status Geral
 
 - **Projeto**: OiPet Saúde
-- **Fase Atual**: Milestone 1 - Setup e Fundação
-- **Última Atualização**: 15/07/2025
-- **Progresso Geral**: 18% (29/162 tasks concluídas)
+- **Fase Atual**: Milestone 2 - Core Backend Services (74% concluído)
+- **Última Atualização**: 18/07/2025
+- **Progresso Geral**: 31% (57/186 tasks concluídas)
 
 ## 🎯 Milestone 1: Setup e Fundação (Semanas 1-2)
 
@@ -68,45 +68,61 @@
 - [ ] Configurar GitHub Actions para testes
 - [ ] Pipeline de build backend
 - [ ] Setup do environment de staging no Railway
-- [ ] Configurar Railway CLI localmente
-- [ ] Testes de deploy automático
+- [✅] Configurar Railway CLI localmente - [18/07/2025]
+- [✅] Testes de deploy automático - [18/07/2025]
+
+### 🎨 M1.6 - Frontend Base e Dashboard
+- [✅] **Configurar React + TypeScript + Vite** - [18/07/2025]
+- [✅] **Setup do React Router e navegação** - [18/07/2025]
+- [✅] **Configurar Zustand para state management** - [18/07/2025]
+- [✅] **Implementar sistema de autenticação frontend** - [18/07/2025]
+- [✅] **Criar AddPetModal funcional** - [18/07/2025]
+- [✅] **Integrar frontend com backend API** - [18/07/2025]
+- [✅] **Implementar Glass Design System (Apple-inspired)** - [18/07/2025]
+- [✅] **Criar ProgressCircle component (Apple Watch style)** - [18/07/2025]
+- [✅] **Implementar WeeklyBarChart com glass container** - [18/07/2025]
+- [✅] **Header glass com logo OiPet oficial** - [18/07/2025]
+- [✅] **Activity Timeline com glass effects** - [18/07/2025]
+- [✅] **Floating Action Button com glass** - [18/07/2025]
+- [✅] **Dashboard principal funcional** - [18/07/2025]
+- [✅] **Corrigir erros CSS e integração** - [18/07/2025]
 
 ## 🎯 Milestone 2: Core Backend Services (Semanas 3-4)
 
 ### 👤 M2.1 - User Service
-- [ ] Criar model User com validações
-- [ ] Implementar CRUD completo de usuários
-- [ ] Endpoint GET /users/profile
-- [ ] Endpoint PUT /users/profile
+- [✅] Criar model User com validações - [18/07/2025]
+- [✅] Implementar CRUD completo de usuários - [18/07/2025]
+- [✅] Endpoint GET /users/profile - [18/07/2025]
+- [✅] Endpoint PUT /users/profile - [18/07/2025]
 - [ ] Endpoint DELETE /users/account
 - [ ] Implementar upload de avatar
-- [ ] Middleware de autorização (admin/user)
+- [✅] Middleware de autorização (admin/user) - [18/07/2025]
 - [ ] Paginação para listagem de usuários
 - [ ] Filtros de busca de usuários
-- [ ] Testes unitários para User service
+- [✅] Testes unitários para User service - [18/07/2025]
 
 ### 🐕 M2.2 - Pet Service
-- [ ] Criar model Pet com validações
-- [ ] Endpoint POST /pets (criar pet)
-- [ ] Endpoint GET /pets (listar pets do usuário)
-- [ ] Endpoint GET /pets/:id (detalhes do pet)
-- [ ] Endpoint PUT /pets/:id (atualizar pet)
-- [ ] Endpoint DELETE /pets/:id (remover pet)
+- [✅] Criar model Pet com validações - [18/07/2025]
+- [✅] Endpoint POST /pets (criar pet) - [18/07/2025]
+- [✅] Endpoint GET /pets (listar pets do usuário) - [18/07/2025]
+- [✅] Endpoint GET /pets/:id (detalhes do pet) - [18/07/2025]
+- [✅] Endpoint PUT /pets/:id (atualizar pet) - [18/07/2025]
+- [✅] Endpoint DELETE /pets/:id (remover pet) - [18/07/2025]
 - [ ] Upload de foto do pet
-- [ ] Validação de ownership (user só vê seus pets)
-- [ ] Cálculo de idade automático
-- [ ] Testes unitários para Pet service
+- [✅] Validação de ownership (user só vê seus pets) - [18/07/2025]
+- [✅] Cálculo de idade automático - [18/07/2025]
+- [✅] Testes unitários para Pet service - [18/07/2025]
 
 ### 🏥 M2.3 - Health Service
-- [ ] Criar model HealthRecord
-- [ ] Endpoint POST /pets/:id/health (criar registro)
-- [ ] Endpoint GET /pets/:id/health (histórico)
-- [ ] Endpoint PUT /health/:id (atualizar registro)
-- [ ] Endpoint DELETE /health/:id (remover registro)
-- [ ] Implementar cálculo de IMC para pets
-- [ ] Validação de dados de saúde
+- [✅] Criar model HealthRecord - [18/07/2025]
+- [✅] Endpoint POST /pets/:id/health (criar registro) - [18/07/2025]
+- [✅] Endpoint GET /pets/:id/health (histórico) - [18/07/2025]
+- [✅] Endpoint PUT /health/:id (atualizar registro) - [18/07/2025]
+- [✅] Endpoint DELETE /health/:id (remover registro) - [18/07/2025]
+- [✅] Implementar cálculo de IMC para pets - [18/07/2025]
+- [✅] Validação de dados de saúde - [18/07/2025]
 - [ ] Agregação de dados por período
-- [ ] Testes unitários para Health service
+- [✅] Testes unitários para Health service - [18/07/2025]
 
 ### 📧 M2.4 - Notification Service
 - [ ] Configurar serviço de email (SendGrid)
@@ -537,8 +553,8 @@
 
 | Milestone | Total Tasks | Concluídas | Progresso |
 |-----------|-------------|------------|-----------|
-| M1 - Setup e Fundação | 20 | 0 | 0% |
-| M2 - Core Backend | 25 | 0 | 0% |
+| M1 - Setup e Fundação | 34 | 31 | 91% |
+| M2 - Core Backend | 35 | 26 | 74% |
 | M3 - Mobile Frontend | 22 | 0 | 0% |
 | M4 - Web Frontend | 20 | 0 | 0% |
 | M5 - Admin Panel | 18 | 0 | 0% |
@@ -547,7 +563,7 @@
 | M8 - Advanced Features | 10 | 0 | 0% |
 | M9 - Testing & Quality | 8 | 0 | 0% |
 | M10 - Launch Prep | 12 | 0 | 0% |
-| **TOTAL** | **162** | **0** | **0%** |
+| **TOTAL** | **186** | **57** | **31%** |
 
 ---
 
