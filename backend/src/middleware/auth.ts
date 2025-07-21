@@ -19,7 +19,7 @@ declare global {
 /**
  * Middleware de autenticação obrigatória
  */
-export const authenticate = async (
+export const auth = async (
   req: Request,
   res: Response,
   next: NextFunction
@@ -92,6 +92,29 @@ export const optionalAuth = async (
 /**
  * Middleware de autorização para administradores
  */
+export const adminAuth = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    // Primeiro, verificar autenticação
+    await auth(req, res, () => {});
+    
+    // Depois verificar se é admin
+    if (!req.user || !req.user.isAdmin) {
+      return res.status(403).json({
+        success: false,
+        message: 'Acesso negado. Apenas administradores.'
+      });
+    }
+    
+    next();
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const requireAdmin = (
   req: Request,
   res: Response,

@@ -11,9 +11,23 @@ import {
   ArrowTrendingUpIcon,
   ArrowTrendingDownIcon
 } from '@heroicons/react/24/outline'
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell
+} from 'recharts'
 
 import { GlassCard, GlassWidget } from '@/components/ui/GlassContainer'
-import { reportService, type ReportData } from '@/services/reportService'
+import { reportServiceReal as reportService, type ReportData } from '@/services/reportServiceReal'
 import { cn } from '@/lib/utils'
 
 interface ReportPreviewProps {
@@ -21,7 +35,87 @@ interface ReportPreviewProps {
 }
 
 export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
-  const { metadata, pets, healthRecords, summary, charts } = data
+  
+  // Simplificar adaptador - trabalhar diretamente com os dados do reportServiceReal
+  const { metadata, pets = [], summary = {} } = data || {}
+  
+  // Verificar se temos dados válidos
+  if (!data) {
+    return (
+      <div className="text-center py-12">
+        <p>Nenhum dado para exibir</p>
+      </div>
+    )
+  }
+
+  // Extrair registros de saúde dos pets de forma segura
+  const healthRecords = pets.flatMap(pet => 
+    (pet.records || []).map(record => ({
+      _id: record.id || `${pet._id}-${record.date}`,
+      petId: pet._id,
+      petName: pet.name,
+      date: record.date,
+      weight: record.weight,
+      height: undefined,
+      activity: record.activity ? {
+        type: record.activity.intensity || 'Exercício',
+        duration: record.activity.exerciseMinutes || 0,
+        intensity: record.activity.intensity || 'moderate',
+        calories: undefined
+      } : undefined,
+      calories: undefined,
+      notes: record.notes
+    }))
+  )
+
+  // Criar charts baseados nos dados reais
+  const weightEvolution = pets.flatMap(pet => {
+    console.log('Pet:', pet.name, 'Records:', pet.records?.length || 0)
+    return (pet.records || [])
+      .filter(r => {
+        console.log('Record date:', r.date, 'weight:', r.weight)
+        return r.weight
+      })
+      .map(r => ({
+        date: new Date(r.date).toLocaleDateString('pt-BR', { month: 'short', day: 'numeric' }),
+        weight: Number(r.weight!.toFixed(1)),
+        petName: pet.name
+      }))
+  })
+  
+  console.log('weightEvolution final:', weightEvolution)
+
+  // Agrupar atividades por intensidade
+  const activityGroups = healthRecords.reduce((acc, record) => {
+    if (record.activity) {
+      const intensity = record.activity.intensity || 'moderate'
+      const intensityLabel = intensity === 'low' ? 'Baixa' : 
+                            intensity === 'high' ? 'Alta' : 'Moderada'
+      acc[intensityLabel] = (acc[intensityLabel] || 0) + 1
+    }
+    return acc
+  }, {} as Record<string, number>)
+
+  const activityDistribution = Object.entries(activityGroups).map(([type, count]) => ({
+    type,
+    count,
+    name: type
+  }))
+
+  const charts = {
+    weightEvolution,
+    activityDistribution,
+    caloriesTrend: []
+  }
+
+  // Adapter final de summary
+  const adaptedSummary = {
+    averageWeight: summary.averageWeight || 0,
+    weightChange: 0,
+    totalActivities: summary.totalActivity || 0,
+    totalCalories: 0,
+    healthScore: summary.healthScore || 0
+  }
 
   const renderMetricCard = (
     title: string,
@@ -71,15 +165,105 @@ export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
   }
 
   const renderChart = (title: string, data: any[], type: 'line' | 'bar' | 'pie') => {
+    console.log(`Renderizando gráfico ${title} com dados:`, data, 'tipo:', type)
+    
+    const colors = ['#E85A5A', '#5AA3A3', '#A35AA3', '#5AE85A', '#E8E85A']
+    
+    const renderLineChart = () => (
+      <ResponsiveContainer width="100%" height={240}>
+        <LineChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="date" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip 
+            labelStyle={{ color: '#374151' }}
+            contentStyle={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              backdropFilter: 'blur(10px)'
+            }}
+          />
+          <Line 
+            type="monotone" 
+            dataKey="weight" 
+            stroke={colors[0]} 
+            strokeWidth={2}
+            dot={{ fill: colors[0], strokeWidth: 2, r: 4 }}
+            activeDot={{ r: 6 }}
+          />
+        </LineChart>
+      </ResponsiveContainer>
+    )
+    
+    const renderBarChart = () => (
+      <ResponsiveContainer width="100%" height={240}>
+        <BarChart data={data}>
+          <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+          <XAxis dataKey="type" tick={{ fontSize: 12 }} />
+          <YAxis tick={{ fontSize: 12 }} />
+          <Tooltip 
+            labelStyle={{ color: '#374151' }}
+            contentStyle={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              backdropFilter: 'blur(10px)'
+            }}
+          />
+          <Bar dataKey="count" fill={colors[1]} radius={[4, 4, 0, 0]} />
+        </BarChart>
+      </ResponsiveContainer>
+    )
+    
+    const renderPieChart = () => (
+      <ResponsiveContainer width="100%" height={240}>
+        <PieChart>
+          <Pie
+            data={data}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
+            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+            outerRadius={80}
+            fill="#8884d8"
+            dataKey="count"
+          >
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+            ))}
+          </Pie>
+          <Tooltip 
+            contentStyle={{ 
+              backgroundColor: 'rgba(255, 255, 255, 0.95)',
+              border: '1px solid #e5e7eb',
+              borderRadius: '8px',
+              backdropFilter: 'blur(10px)'
+            }}
+          />
+        </PieChart>
+      </ResponsiveContainer>
+    )
+
     return (
       <GlassCard>
         <h4 className="text-lg font-semibold text-gray-900 mb-4">{title}</h4>
-        <div className="h-64 bg-gradient-to-br from-gray-50 to-gray-100 rounded-glass flex items-center justify-center">
-          <div className="text-center text-gray-500">
-            <ChartBarIcon className="h-12 w-12 mx-auto mb-2" />
-            <p className="text-sm">Gráfico: {title}</p>
-            <p className="text-xs">{data.length} pontos de dados</p>
-          </div>
+        <div className="h-64">
+          {data.length === 0 ? (
+            <div className="h-full bg-gradient-to-br from-gray-50 to-gray-100 rounded-glass flex items-center justify-center">
+              <div className="text-center text-gray-500">
+                <ChartBarIcon className="h-12 w-12 mx-auto mb-2" />
+                <p className="text-sm">Nenhum dado disponível</p>
+                <p className="text-xs">Adicione registros para ver gráficos</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {type === 'line' && renderLineChart()}
+              {type === 'bar' && renderBarChart()}
+              {type === 'pie' && renderPieChart()}
+            </>
+          )}
         </div>
       </GlassCard>
     )
@@ -118,9 +302,9 @@ export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
                   <span>{metadata.period}</span>
                 </div>
                 <div className="flex items-center space-x-4 text-sm">
-                  <span>{metadata.petCount} pets</span>
+                  <span>{metadata?.petCount || pets.length} pets</span>
                   <span>•</span>
-                  <span>{metadata.recordCount} registros</span>
+                  <span>{metadata?.recordCount || healthRecords.length} registros</span>
                   <span>•</span>
                   <span>Gerado em {new Date(metadata.generatedAt).toLocaleDateString('pt-BR')}</span>
                 </div>
@@ -147,7 +331,7 @@ export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
           {renderMetricCard(
             'Peso Médio',
-            `${summary.averageWeight}kg`,
+            `${adaptedSummary.averageWeight.toFixed(1)}kg`,
             'Todos os pets',
             ScaleIcon,
             'blue'
@@ -155,16 +339,16 @@ export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
           
           {renderMetricCard(
             'Variação de Peso',
-            `${summary.weightChange > 0 ? '+' : ''}${summary.weightChange}kg`,
+            `${adaptedSummary.weightChange > 0 ? '+' : ''}${adaptedSummary.weightChange}kg`,
             'No período',
             ScaleIcon,
-            summary.weightChange > 0 ? 'green' : summary.weightChange < 0 ? 'red' : 'gray',
-            summary.weightChange > 0 ? 'up' : summary.weightChange < 0 ? 'down' : 'neutral'
+            adaptedSummary.weightChange > 0 ? 'green' : adaptedSummary.weightChange < 0 ? 'red' : 'gray',
+            adaptedSummary.weightChange > 0 ? 'up' : adaptedSummary.weightChange < 0 ? 'down' : 'neutral'
           )}
           
           {renderMetricCard(
             'Atividades',
-            summary.totalActivities,
+            adaptedSummary.totalActivities,
             'Registros de exercício',
             FireIcon,
             'orange'
@@ -172,7 +356,7 @@ export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
           
           {renderMetricCard(
             'Calorias Queimadas',
-            `${summary.totalCalories} kcal`,
+            `${adaptedSummary.totalCalories} kcal`,
             'Total no período',
             FireIcon,
             'red'
@@ -180,10 +364,10 @@ export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
           
           {renderMetricCard(
             'Score de Saúde',
-            `${summary.healthScore}%`,
-            getHealthScoreLabel(summary.healthScore),
+            `${adaptedSummary.healthScore}%`,
+            getHealthScoreLabel(adaptedSummary.healthScore),
             TrophyIcon,
-            getHealthScoreColor(summary.healthScore)
+            getHealthScoreColor(adaptedSummary.healthScore)
           )}
         </div>
       </motion.div>
@@ -302,7 +486,7 @@ export const ReportPreview: React.FC<ReportPreviewProps> = ({ data }) => {
                           <div>
                             <div className="font-medium">{record.activity.type}</div>
                             <div className="text-xs">
-                              {reportService.formatDuration(record.activity.duration)} • {reportService.getIntensityLabel(record.activity.intensity)}
+                              {record.activity.duration}min • {record.activity.intensity}
                             </div>
                           </div>
                         ) : '-'}

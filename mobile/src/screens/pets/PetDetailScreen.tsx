@@ -18,7 +18,7 @@ import { useNavigation, useRoute, useFocusEffect } from '@react-navigation/nativ
 import { Ionicons } from '@expo/vector-icons';
 
 import { GlassContainer } from '../../components/ui/GlassContainer';
-import { COLORS } from '../../constants/theme';
+import { COLORS, TYPOGRAPHY, SPACING } from '../../constants/theme';
 import { PetService } from '../../services/PetService';
 import { HealthService } from '../../services/HealthService';
 
@@ -120,15 +120,15 @@ export const PetDetailScreen: React.FC = () => {
   const getIMCColor = (classification: string) => {
     switch (classification.toLowerCase()) {
       case 'abaixo do peso':
-        return COLORS.semantic.warning;
+        return COLORS.system.warning;
       case 'peso ideal':
-        return COLORS.semantic.success;
+        return COLORS.system.success;
       case 'sobrepeso':
-        return COLORS.semantic.warning;
+        return COLORS.system.warning;
       case 'obesidade':
-        return COLORS.semantic.error;
+        return COLORS.system.error;
       default:
-        return COLORS.text.secondary;
+        return COLORS.system.text.secondary;
     }
   };
 
@@ -144,7 +144,7 @@ export const PetDetailScreen: React.FC = () => {
   if (!pet) {
     return (
       <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle" size={48} color={COLORS.semantic.error} />
+        <Ionicons name="alert-circle" size={48} color={COLORS.system.error} />
         <Text style={styles.errorText}>Pet não encontrado</Text>
         <TouchableOpacity
           style={styles.backButton}
@@ -178,7 +178,7 @@ export const PetDetailScreen: React.FC = () => {
                 <Ionicons 
                   name={getSpeciesIcon(pet.species)} 
                   size={48} 
-                  color={COLORS.text.secondary} 
+                  color={COLORS.system.text.secondary} 
                 />
               </View>
             )}
@@ -235,7 +235,7 @@ export const PetDetailScreen: React.FC = () => {
 
         {pet.microchipId && (
           <View style={styles.microchipContainer}>
-            <Ionicons name="hardware-chip" size={20} color={COLORS.text.secondary} />
+            <Ionicons name="hardware-chip" size={20} color={COLORS.system.text.secondary} />
             <Text style={styles.microchipText}>Microchip: {pet.microchipId}</Text>
           </View>
         )}
@@ -339,53 +339,55 @@ export const PetDetailScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
-    padding: 16,
+    backgroundColor: COLORS.system.background,
+    padding: SPACING.lg,
   },
   loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background.primary,
+    backgroundColor: COLORS.system.background,
   },
   loadingText: {
-    marginTop: 16,
-    fontSize: 16,
-    color: COLORS.text.secondary,
+    marginTop: SPACING.lg,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.secondary,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: COLORS.background.primary,
-    padding: 32,
+    backgroundColor: COLORS.system.background,
+    padding: SPACING['3xl'],
   },
   errorText: {
-    fontSize: 18,
-    color: COLORS.text.primary,
-    marginTop: 16,
-    marginBottom: 24,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING['2xl'],
   },
   backButton: {
     backgroundColor: COLORS.primary.coral,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING['2xl'],
+    paddingVertical: SPACING.md,
     borderRadius: 8,
   },
   backButtonText: {
-    color: COLORS.background.primary,
-    fontWeight: '600',
+    color: COLORS.system.text.inverse,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
   },
   headerContainer: {
-    padding: 20,
-    marginBottom: 16,
+    padding: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   headerContent: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   petImageContainer: {
-    marginRight: 16,
+    marginRight: SPACING.lg,
   },
   petImage: {
     width: 80,
@@ -400,25 +402,27 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   petInfo: {
     flex: 1,
   },
   petName: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.fontSize['2xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.xs,
   },
   petBreed: {
-    fontSize: 16,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.secondary,
     marginBottom: 2,
   },
   petAge: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
   },
   editButton: {
     width: 40,
@@ -428,17 +432,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   infoContainer: {
-    padding: 20,
-    marginBottom: 16,
+    padding: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: 16,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.lg,
   },
   infoGrid: {
     flexDirection: 'row',
@@ -449,41 +453,43 @@ const styles = StyleSheet.create({
     width: '48%',
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   infoLabel: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
-    marginTop: 8,
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginTop: SPACING.sm,
+    marginBottom: SPACING.xs,
   },
   infoValue: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.primary,
   },
   microchipContainer: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
-    padding: 16,
-    marginTop: 8,
+    padding: SPACING.lg,
+    marginTop: SPACING.sm,
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   microchipText: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
-    marginLeft: 8,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginLeft: SPACING.sm,
   },
   imcContainer: {
-    padding: 20,
-    marginBottom: 16,
+    padding: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   imcContent: {
     flexDirection: 'row',
@@ -494,28 +500,28 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   imcNumber: {
-    fontSize: 32,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize['3xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   imcClassification: {
-    fontSize: 16,
-    fontWeight: '600',
-    marginTop: 4,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    marginTop: SPACING.xs,
   },
   imcButton: {
     backgroundColor: COLORS.primary.coral,
-    paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING.xl,
+    paddingVertical: SPACING.md,
     borderRadius: 8,
   },
   imcButtonText: {
-    color: COLORS.background.primary,
-    fontWeight: '600',
+    color: COLORS.system.text.inverse,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
   },
   statsContainer: {
-    padding: 20,
-    marginBottom: 16,
+    padding: SPACING.xl,
+    marginBottom: SPACING.lg,
   },
   statsGrid: {
     flexDirection: 'row',
@@ -525,19 +531,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   statNumber: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize['2xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   statLabel: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
-    marginTop: 4,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginTop: SPACING.xs,
     textAlign: 'center',
   },
   actionsContainer: {
-    padding: 20,
-    marginBottom: 32,
+    padding: SPACING.xl,
+    marginBottom: SPACING['3xl'],
   },
   actionButtons: {
     flexDirection: 'row',
@@ -547,16 +554,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
-    padding: 16,
+    padding: SPACING.lg,
     width: '30%',
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   actionText: {
-    fontSize: 12,
-    color: COLORS.text.primary,
-    marginTop: 8,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
+    marginTop: SPACING.sm,
     textAlign: 'center',
-    fontWeight: '500',
   },
 });

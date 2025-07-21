@@ -20,7 +20,7 @@ interface HealthData {
 
 interface HealthStatsWidgetProps {
   data: HealthData
-  petName: string
+  petName?: string
   className?: string
 }
 

@@ -3,21 +3,22 @@ import { motion } from 'framer-motion'
 import { 
   MagnifyingGlassIcon,
   FunnelIcon,
-  ShoppingCartIcon,
   HeartIcon,
   StarIcon,
   TagIcon,
   ChevronDownIcon,
-  ExclamationTriangleIcon
+  SparklesIcon,
+  ArrowRightIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
 
 import { GlassContainer, GlassCard, GlassWidget } from '@/components/ui/GlassContainer'
 import { ProductCard } from '@/components/store/ProductCard'
-import { CartSidebar } from '@/components/store/CartSidebar'
+import { OiPetWebView } from '@/components/store/OiPetWebView'
 import { ecommerceService, type Product, type ProductFilter } from '@/services/ecommerceService'
-import { useCartStore } from '@/stores/cartStore'
+import { ecommerceAnalytics } from '@/services/ecommerceAnalytics'
 import { cn } from '@/lib/utils'
+import { OiPetLogo } from '@/components/ui/OiPetLogo'
 
 const categories = [
   { id: 'all', name: 'Todos', icon: '🏪' },
@@ -45,6 +46,7 @@ const sortOptions = [
 
 export const StorePage: React.FC = () => {
   const [products, setProducts] = useState<Product[]>([])
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
@@ -52,11 +54,13 @@ export const StorePage: React.FC = () => {
   const [sortBy, setSortBy] = useState('relevance')
   const [showFilters, setShowFilters] = useState(false)
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
+  const [showWebView, setShowWebView] = useState(false)
   
-  const { getTotalItems, isOpen: cartOpen } = useCartStore()
+  // Removed cart functionality - purchases happen directly on OiPet website
 
   useEffect(() => {
     loadProducts()
+    loadFeaturedProducts()
   }, [selectedCategory, selectedPetType])
 
   const loadProducts = async () => {
@@ -75,6 +79,18 @@ export const StorePage: React.FC = () => {
       console.error('Erro ao carregar produtos:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const loadFeaturedProducts = async () => {
+    try {
+      const allProducts = await ecommerceService.getProducts({ inStock: true })
+      const featured = allProducts
+        .filter(p => p.isRecommended || p.discount > 20)
+        .slice(0, 8)
+      setFeaturedProducts(featured)
+    } catch (error) {
+      console.error('Erro ao carregar produtos em destaque:', error)
     }
   }
 
@@ -121,7 +137,7 @@ export const StorePage: React.FC = () => {
     })
   }
 
-  const totalItems = getTotalItems()
+  // Simplified store - no cart needed, direct purchases on OiPet website
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -131,31 +147,27 @@ export const StorePage: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">
-                Loja OiPet 🛒
+                Produtos OiPet 🐾
               </h1>
               <p className="text-gray-600">
-                Produtos selecionados para o seu pet
+                Alimentação natural e saudável para o seu pet
               </p>
             </div>
             
             <div className="flex items-center space-x-4">
-              {/* Cart Button */}
+              {/* View Full Catalog Button */}
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
-                onClick={() => useCartStore.getState().toggleCart()}
-                className="relative p-3 bg-coral-500 text-white rounded-glass hover:bg-coral-600 transition-colors"
+                onClick={() => {
+                  ecommerceAnalytics.trackWebViewOpened('header_button')
+                  ecommerceAnalytics.trackHybridConversion('catalog_button')
+                  setShowWebView(true)
+                }}
+                className="px-6 py-3 bg-coral-500 text-white rounded-glass hover:bg-coral-600 transition-colors flex items-center space-x-2 font-medium"
               >
-                <ShoppingCartIcon className="h-6 w-6" />
-                {totalItems > 0 && (
-                  <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-6 w-6 flex items-center justify-center font-bold"
-                  >
-                    {totalItems}
-                  </motion.div>
-                )}
+                <SparklesIcon className="h-5 w-5" />
+                <span>Ver Catálogo Completo</span>
               </motion.button>
             </div>
           </div>
@@ -163,6 +175,42 @@ export const StorePage: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Featured Products Section */}
+        {featuredProducts.length > 0 && (
+          <div className="mb-12">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">Produtos em Destaque ⭐</h2>
+                <p className="text-gray-600">Ofertas especiais e produtos recomendados</p>
+              </div>
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => {
+                  ecommerceAnalytics.trackWebViewOpened('featured_products')
+                  ecommerceAnalytics.trackHybridConversion('featured_products')
+                  setShowWebView(true)
+                }}
+                className="flex items-center space-x-2 text-coral-600 hover:text-coral-700 font-medium"
+              >
+                <span>Ver todos</span>
+                <ArrowRightIcon className="h-4 w-4" />
+              </motion.button>
+            </div>
+            
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {featuredProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  isFavorite={favorites.has(product.id)}
+                  onToggleFavorite={() => toggleFavorite(product.id)}
+                  onOpenWebView={() => setShowWebView(true)}
+                />
+              ))}
+            </div>
+          </div>
+        )}
         {/* Search and Filters */}
         <GlassCard className="mb-8">
           <div className="space-y-4">
@@ -288,17 +336,19 @@ export const StorePage: React.FC = () => {
           </p>
           
           {/* OiPet Store Link */}
-          <motion.a
+          <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            href={ecommerceService.getOiPetStoreUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
+            onClick={() => {
+              ecommerceAnalytics.trackWebViewOpened('search_results')
+              ecommerceAnalytics.trackHybridConversion('search_results')
+              setShowWebView(true)
+            }}
             className="flex items-center space-x-2 text-coral-600 hover:text-coral-700 font-medium"
           >
-            <span>Ver loja completa</span>
-            <ExclamationTriangleIcon className="h-4 w-4" />
-          </motion.a>
+            <span>Ver catálogo completo</span>
+            <ArrowRightIcon className="h-4 w-4" />
+          </motion.button>
         </div>
 
         {/* Products Grid */}
@@ -346,6 +396,7 @@ export const StorePage: React.FC = () => {
                 product={product}
                 isFavorite={favorites.has(product.id)}
                 onToggleFavorite={() => toggleFavorite(product.id)}
+                onOpenWebView={() => setShowWebView(true)}
               />
             ))}
           </div>
@@ -365,8 +416,11 @@ export const StorePage: React.FC = () => {
         )}
       </div>
 
-      {/* Cart Sidebar */}
-      <CartSidebar />
+      {/* OiPet WebView */}
+      <OiPetWebView 
+        isOpen={showWebView}
+        onClose={() => setShowWebView(false)}
+      />
     </div>
   )
 }

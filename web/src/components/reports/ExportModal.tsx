@@ -12,7 +12,7 @@ import {
 } from '@heroicons/react/24/outline'
 
 import { GlassContainer } from '@/components/ui/GlassContainer'
-import { reportService, type ReportData, type ExportOptions } from '@/services/reportService'
+import { reportServiceReal as reportService, type ReportData, type ExportOptions } from '@/services/reportServiceReal'
 import { cn } from '@/lib/utils'
 
 interface ExportModalProps {

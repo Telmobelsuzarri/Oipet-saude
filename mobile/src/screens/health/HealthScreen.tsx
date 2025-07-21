@@ -17,7 +17,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { GlassContainer } from '../../components/ui/GlassContainer';
-import { COLORS } from '../../constants/theme';
+import { COLORS, TYPOGRAPHY, SPACING } from '../../constants/theme';
 import { PetService } from '../../services/PetService';
 import { HealthService } from '../../services/HealthService';
 
@@ -128,15 +128,15 @@ export const HealthScreen: React.FC = () => {
   const getIMCColor = (classification: string) => {
     switch (classification.toLowerCase()) {
       case 'abaixo do peso':
-        return COLORS.semantic.warning;
+        return COLORS.system.warning;
       case 'peso ideal':
-        return COLORS.semantic.success;
+        return COLORS.system.success;
       case 'sobrepeso':
-        return COLORS.semantic.warning;
+        return COLORS.system.warning;
       case 'obesidade':
-        return COLORS.semantic.error;
+        return COLORS.system.error;
       default:
-        return COLORS.text.secondary;
+        return COLORS.system.text.secondary;
     }
   };
 
@@ -262,7 +262,7 @@ export const HealthScreen: React.FC = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <GlassContainer variant="widget" style={styles.emptyContent}>
-        <Ionicons name="medical" size={64} color={COLORS.text.secondary} />
+        <Ionicons name="medical" size={64} color={COLORS.system.text.secondary} />
         <Text style={styles.emptyTitle}>Nenhum pet encontrado</Text>
         <Text style={styles.emptyMessage}>
           Adicione um pet primeiro para começar a monitorar sua saúde
@@ -272,7 +272,7 @@ export const HealthScreen: React.FC = () => {
           style={styles.addPetButton}
           onPress={() => navigation.navigate('AddPet')}
         >
-          <Ionicons name="add" size={24} color={COLORS.background.primary} />
+          <Ionicons name="add" size={24} color={COLORS.system.text.inverse} />
           <Text style={styles.addPetButtonText}>Adicionar Pet</Text>
         </TouchableOpacity>
       </GlassContainer>
@@ -321,29 +321,29 @@ export const HealthScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
-    padding: 16,
+    backgroundColor: COLORS.system.background,
+    padding: SPACING.lg,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: SPACING['2xl'],
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize['3xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   content: {
     flex: 1,
   },
   overviewContainer: {
-    padding: 20,
-    marginBottom: 24,
+    padding: SPACING.xl,
+    marginBottom: SPACING['2xl'],
   },
   overviewTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: 16,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.lg,
   },
   overviewStats: {
     flexDirection: 'row',
@@ -353,45 +353,47 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   overviewValue: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize['2xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   overviewLabel: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
-    marginTop: 4,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginTop: SPACING.xs,
     textAlign: 'center',
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: 16,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.lg,
   },
   petCard: {
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   cardContent: {
-    padding: 16,
+    padding: SPACING.lg,
   },
   petHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   petInfo: {
     flex: 1,
   },
   petName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   petBreed: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.secondary,
     marginTop: 2,
   },
   quickActions: {
@@ -405,30 +407,31 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   healthData: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   imcContainer: {
     alignItems: 'center',
     flex: 1,
   },
   imcLabel: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginBottom: SPACING.xs,
   },
   imcValue: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   imcClassification: {
     fontSize: 10,
-    fontWeight: '600',
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
     marginTop: 2,
   },
   lastRecordContainer: {
@@ -436,90 +439,95 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   lastRecordLabel: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
-    marginBottom: 4,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginBottom: SPACING.xs,
   },
   lastRecordDate: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.primary,
     textAlign: 'center',
   },
   lastRecordData: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    marginTop: 4,
-    gap: 8,
+    marginTop: SPACING.xs,
+    gap: SPACING.sm,
   },
   lastRecordValue: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
   },
   moodEmoji: {
-    fontSize: 16,
+    fontSize: TYPOGRAPHY.fontSize.base,
   },
   noRecords: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
     fontStyle: 'italic',
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-around',
-    paddingTop: 16,
+    paddingTop: SPACING.lg,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border.primary,
+    borderTopColor: COLORS.system.border.light,
   },
   statItem: {
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   statLabel: {
     fontSize: 10,
-    color: COLORS.text.secondary,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
     marginTop: 2,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: SPACING['3xl'],
   },
   emptyContent: {
-    padding: 32,
+    padding: SPACING['3xl'],
     alignItems: 'center',
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   emptyMessage: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
+    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.sm,
+    marginBottom: SPACING['2xl'],
   },
   addPetButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.primary.coral,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING['2xl'],
+    paddingVertical: SPACING.md,
     borderRadius: 8,
   },
   addPetButtonText: {
-    color: COLORS.background.primary,
-    fontWeight: '600',
-    marginLeft: 8,
+    color: COLORS.system.text.inverse,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    marginLeft: SPACING.sm,
   },
 });

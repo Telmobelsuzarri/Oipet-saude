@@ -93,11 +93,34 @@ apiClient.interceptors.response.use(
 
 // Mock functions for development
 const mockLogin = (email: string, password: string) => {
+  // Admin credentials
+  if (email === 'admin@oipet.com' && password === 'admin123') {
+    return Promise.resolve({
+      data: {
+        data: {
+          user: {
+            _id: 'admin-1',
+            name: 'Administrador OiPet',
+            email: email,
+            avatar: null,
+            isAdmin: true,
+            isEmailVerified: true,
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          },
+          accessToken: 'mock-admin-token-' + Date.now(),
+          refreshToken: 'mock-admin-refresh-' + Date.now(),
+        }
+      }
+    })
+  }
+  
+  // Regular user credentials
   return Promise.resolve({
     data: {
       data: {
         user: {
-          id: '1',
+          _id: '1',
           name: 'Usuário Teste',
           email: email,
           avatar: null,

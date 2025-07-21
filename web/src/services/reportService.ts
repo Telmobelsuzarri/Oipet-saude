@@ -1,5 +1,4 @@
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfYear, endOfYear } from 'date-fns'
-import { ptBR } from 'date-fns/locale'
 
 export interface HealthRecord {
   _id: string
@@ -219,8 +218,8 @@ class ReportService {
 
     switch (period) {
       case 'week':
-        start = startOfWeek(now, { locale: ptBR })
-        end = endOfWeek(now, { locale: ptBR })
+        start = startOfWeek(now, { weekStartsOn: 1 })
+        end = endOfWeek(now, { weekStartsOn: 1 })
         break
       case 'month':
         start = startOfMonth(now)
@@ -351,15 +350,15 @@ class ReportService {
 
     switch (period) {
       case 'week':
-        return `Semana de ${format(start, 'dd/MM', { locale: ptBR })} a ${format(end, 'dd/MM/yyyy', { locale: ptBR })}`
+        return `Semana de ${format(start, 'dd/MM')} a ${format(end, 'dd/MM/yyyy')}`
       case 'month':
-        return format(start, 'MMMM yyyy', { locale: ptBR })
+        return format(start, 'MMMM yyyy')
       case 'quarter':
         return `Q${Math.floor(start.getMonth() / 3) + 1} ${start.getFullYear()}`
       case 'year':
         return start.getFullYear().toString()
       default:
-        return `${format(start, 'dd/MM/yyyy', { locale: ptBR })} a ${format(end, 'dd/MM/yyyy', { locale: ptBR })}`
+        return `${format(start, 'dd/MM/yyyy')} a ${format(end, 'dd/MM/yyyy')}`
     }
   }
 

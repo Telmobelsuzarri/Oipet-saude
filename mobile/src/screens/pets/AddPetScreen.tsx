@@ -21,7 +21,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { Ionicons } from '@expo/vector-icons';
 
 import { GlassContainer } from '../../components/ui/GlassContainer';
-import { COLORS, GLASS_CONFIG } from '../../constants/theme';
+import { COLORS, TYPOGRAPHY, SPACING } from '../../constants/theme';
 import { PetService } from '../../services/PetService';
 
 interface CreatePetData {
@@ -129,7 +129,7 @@ export const AddPetScreen: React.FC = () => {
             <Image source={{ uri: selectedImage }} style={styles.petImage} />
           ) : (
             <View style={styles.placeholderImage}>
-              <Ionicons name="camera" size={32} color={COLORS.text.secondary} />
+              <Ionicons name="camera" size={32} color={COLORS.system.text.secondary} />
               <Text style={styles.imageText}>Adicionar Foto</Text>
             </View>
           )}
@@ -143,7 +143,7 @@ export const AddPetScreen: React.FC = () => {
             value={petData.name}
             onChangeText={(text) => setPetData({ ...petData, name: text })}
             placeholder="Nome do pet"
-            placeholderTextColor={COLORS.text.secondary}
+            placeholderTextColor={COLORS.system.text.secondary}
           />
         </View>
 
@@ -171,7 +171,7 @@ export const AddPetScreen: React.FC = () => {
             value={petData.breed}
             onChangeText={(text) => setPetData({ ...petData, breed: text })}
             placeholder="Raça do pet"
-            placeholderTextColor={COLORS.text.secondary}
+            placeholderTextColor={COLORS.system.text.secondary}
           />
         </View>
 
@@ -185,7 +185,7 @@ export const AddPetScreen: React.FC = () => {
             <Text style={styles.dateText}>
               {petData.birthDate.toLocaleDateString('pt-BR')}
             </Text>
-            <Ionicons name="calendar" size={20} color={COLORS.text.secondary} />
+            <Ionicons name="calendar" size={20} color={COLORS.system.text.secondary} />
           </TouchableOpacity>
         </View>
 
@@ -208,7 +208,7 @@ export const AddPetScreen: React.FC = () => {
               value={petData.weight}
               onChangeText={(text) => setPetData({ ...petData, weight: text })}
               placeholder="0.0"
-              placeholderTextColor={COLORS.text.secondary}
+              placeholderTextColor={COLORS.system.text.secondary}
               keyboardType="numeric"
             />
           </View>
@@ -220,7 +220,7 @@ export const AddPetScreen: React.FC = () => {
               value={petData.height}
               onChangeText={(text) => setPetData({ ...petData, height: text })}
               placeholder="0.0"
-              placeholderTextColor={COLORS.text.secondary}
+              placeholderTextColor={COLORS.system.text.secondary}
               keyboardType="numeric"
             />
           </View>
@@ -269,7 +269,7 @@ export const AddPetScreen: React.FC = () => {
         >
           <View style={[styles.checkbox, petData.isNeutered && styles.checkboxActive]}>
             {petData.isNeutered && (
-              <Ionicons name="checkmark" size={16} color={COLORS.background.primary} />
+              <Ionicons name="checkmark" size={16} color={COLORS.system.text.inverse} />
             )}
           </View>
           <Text style={styles.checkboxText}>Pet castrado</Text>
@@ -283,7 +283,7 @@ export const AddPetScreen: React.FC = () => {
             value={petData.microchipId}
             onChangeText={(text) => setPetData({ ...petData, microchipId: text })}
             placeholder="ID do microchip (opcional)"
-            placeholderTextColor={COLORS.text.secondary}
+            placeholderTextColor={COLORS.system.text.secondary}
           />
         </View>
 
@@ -314,19 +314,19 @@ export const AddPetScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
-    padding: 16,
+    backgroundColor: COLORS.system.background,
+    padding: SPACING.lg,
   },
   formContainer: {
-    padding: 20,
-    marginBottom: 20,
+    padding: SPACING.xl,
+    marginBottom: SPACING.xl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize['2xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
     textAlign: 'center',
-    marginBottom: 24,
+    marginBottom: SPACING['2xl'],
   },
   imageContainer: {
     alignSelf: 'center',
@@ -345,54 +345,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
     borderStyle: 'dashed',
   },
   imageText: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
-    marginTop: 4,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginTop: SPACING.xs,
   },
   inputGroup: {
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   label: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text.primary,
-    marginBottom: 8,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.sm,
   },
   input: {
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: COLORS.text.primary,
+    padding: SPACING.lg,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   pickerContainer: {
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   picker: {
-    color: COLORS.text.primary,
+    color: COLORS.system.text.primary,
   },
   dateButton: {
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
-    padding: 16,
+    padding: SPACING.lg,
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   dateText: {
-    fontSize: 16,
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
   },
   row: {
     flexDirection: 'row',
@@ -405,13 +408,13 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
-    padding: 4,
+    padding: SPACING.xs,
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   genderButton: {
     flex: 1,
-    padding: 12,
+    padding: SPACING.md,
     borderRadius: 8,
     alignItems: 'center',
   },
@@ -419,70 +422,72 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.primary.coral,
   },
   genderText: {
-    fontSize: 16,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.secondary,
   },
   genderTextActive: {
-    color: COLORS.background.primary,
-    fontWeight: '600',
+    color: COLORS.system.text.inverse,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
   },
   checkboxContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   checkbox: {
     width: 24,
     height: 24,
     borderRadius: 6,
     borderWidth: 2,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: SPACING.md,
   },
   checkboxActive: {
     backgroundColor: COLORS.primary.coral,
     borderColor: COLORS.primary.coral,
   },
   checkboxText: {
-    fontSize: 16,
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
   },
   buttonContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    marginTop: 24,
+    marginTop: SPACING['2xl'],
   },
   cancelButton: {
     flex: 1,
     backgroundColor: COLORS.glass.widget,
     borderRadius: 12,
-    padding: 16,
+    padding: SPACING.lg,
     alignItems: 'center',
-    marginRight: 8,
+    marginRight: SPACING.sm,
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   cancelButtonText: {
-    fontSize: 16,
-    color: COLORS.text.secondary,
-    fontWeight: '600',
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.secondary,
   },
   saveButton: {
     flex: 1,
     backgroundColor: COLORS.primary.coral,
     borderRadius: 12,
-    padding: 16,
+    padding: SPACING.lg,
     alignItems: 'center',
-    marginLeft: 8,
+    marginLeft: SPACING.sm,
   },
   saveButtonDisabled: {
     opacity: 0.5,
   },
   saveButtonText: {
-    fontSize: 16,
-    color: COLORS.background.primary,
-    fontWeight: '600',
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.inverse,
   },
 });

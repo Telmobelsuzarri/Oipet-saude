@@ -18,7 +18,7 @@ import { Ionicons } from '@expo/vector-icons';
 import * as Notifications from 'expo-notifications';
 
 import { GlassContainer } from '../../components/ui/GlassContainer';
-import { COLORS } from '../../constants/theme';
+import { COLORS, TYPOGRAPHY, SPACING } from '../../constants/theme';
 import { NotificationService } from '../../services/NotificationService';
 import { useAppDispatch, useAppSelector } from '../../store';
 
@@ -188,11 +188,11 @@ export const NotificationsScreen: React.FC = () => {
     switch (type) {
       case 'health': return COLORS.primary.coral;
       case 'reminder': return COLORS.primary.teal;
-      case 'alert': return COLORS.semantic.error;
-      case 'promotion': return COLORS.semantic.warning;
-      case 'info': return COLORS.semantic.info;
-      case 'system': return COLORS.text.secondary;
-      default: return COLORS.text.primary;
+      case 'alert': return COLORS.system.error;
+      case 'promotion': return COLORS.system.warning;
+      case 'info': return COLORS.system.info;
+      case 'system': return COLORS.system.text.secondary;
+      default: return COLORS.system.text.primary;
     }
   };
 
@@ -260,7 +260,7 @@ export const NotificationsScreen: React.FC = () => {
               deleteNotification(item._id);
             }}
           >
-            <Ionicons name="trash-outline" size={20} color={COLORS.text.secondary} />
+            <Ionicons name="trash-outline" size={20} color={COLORS.system.text.secondary} />
           </TouchableOpacity>
         </View>
 
@@ -315,7 +315,7 @@ export const NotificationsScreen: React.FC = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <GlassContainer variant="widget" style={styles.emptyContent}>
-        <Ionicons name="notifications-off" size={64} color={COLORS.text.secondary} />
+        <Ionicons name="notifications-off" size={64} color={COLORS.system.text.secondary} />
         <Text style={styles.emptyTitle}>
           {filter === 'unread' ? 'Nenhuma notificação não lida' : 'Nenhuma notificação'}
         </Text>
@@ -397,51 +397,51 @@ export const NotificationsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
-    padding: 16,
+    backgroundColor: COLORS.system.background,
+    padding: SPACING.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: SPACING['2xl'],
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize['3xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   headerActions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: SPACING.md,
   },
   filterButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.glass.widget,
-    paddingHorizontal: 16,
-    paddingVertical: 8,
+    paddingHorizontal: SPACING.lg,
+    paddingVertical: SPACING.sm,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   filterText: {
-    fontSize: 14,
-    color: COLORS.text.primary,
-    fontWeight: '500',
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
   },
   badge: {
     backgroundColor: COLORS.primary.coral,
     borderRadius: 10,
-    paddingHorizontal: 6,
+    paddingHorizontal: SPACING.xs,
     paddingVertical: 2,
-    marginLeft: 8,
+    marginLeft: SPACING.sm,
   },
   badgeText: {
-    fontSize: 12,
-    color: COLORS.background.primary,
-    fontWeight: '600',
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.inverse,
   },
   markAllButton: {
     width: 36,
@@ -451,60 +451,62 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   settingsContainer: {
-    padding: 20,
-    marginBottom: 24,
+    padding: SPACING.xl,
+    marginBottom: SPACING['2xl'],
   },
   settingsTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: 16,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.lg,
   },
   settingsSubtitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text.primary,
-    marginBottom: 12,
-    marginTop: 8,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.md,
+    marginTop: SPACING.sm,
   },
   settingItem: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: 12,
+    paddingVertical: SPACING.md,
   },
   settingInfo: {
     flex: 1,
-    marginRight: 16,
+    marginRight: SPACING.lg,
   },
   settingLabel: {
-    fontSize: 16,
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
     marginBottom: 2,
   },
   settingDescription: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
   },
   settingsDivider: {
     height: 1,
-    backgroundColor: COLORS.border.primary,
-    marginVertical: 16,
+    backgroundColor: COLORS.system.border.light,
+    marginVertical: SPACING.lg,
   },
   sectionTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginBottom: 16,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginBottom: SPACING.lg,
   },
   notificationCard: {
-    marginBottom: 12,
+    marginBottom: SPACING.md,
   },
   cardContent: {
-    padding: 16,
+    padding: SPACING.lg,
     position: 'relative',
   },
   unreadCard: {
@@ -514,7 +516,7 @@ const styles = StyleSheet.create({
   notificationHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
-    marginBottom: 8,
+    marginBottom: SPACING.sm,
   },
   iconContainer: {
     width: 40,
@@ -522,62 +524,65 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
-    marginRight: 12,
+    marginRight: SPACING.md,
   },
   notificationInfo: {
     flex: 1,
   },
   notificationTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    color: COLORS.system.text.primary,
     marginBottom: 2,
   },
   unreadText: {
-    fontWeight: 'bold',
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
   },
   notificationTime: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
   },
   deleteButton: {
-    padding: 8,
+    padding: SPACING.sm,
   },
   notificationMessage: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
-    lineHeight: 20,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.sm,
     marginLeft: 52,
   },
   unreadIndicator: {
     position: 'absolute',
-    top: 16,
-    right: 16,
+    top: SPACING.lg,
+    right: SPACING.lg,
     width: 8,
     height: 8,
     borderRadius: 4,
     backgroundColor: COLORS.primary.coral,
   },
   emptyContainer: {
-    paddingVertical: 48,
-    paddingHorizontal: 32,
+    paddingVertical: SPACING['4xl'],
+    paddingHorizontal: SPACING['3xl'],
   },
   emptyContent: {
-    padding: 32,
+    padding: SPACING['3xl'],
     alignItems: 'center',
   },
   emptyTitle: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
     textAlign: 'center',
   },
   emptyMessage: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
     textAlign: 'center',
-    lineHeight: 20,
+    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.sm,
   },
 });

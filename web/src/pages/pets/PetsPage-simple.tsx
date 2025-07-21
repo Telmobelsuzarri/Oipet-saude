@@ -1,8 +1,12 @@
 import React, { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
+import { PlusIcon, HeartIcon, ChartBarIcon } from '@heroicons/react/24/outline'
 import { usePetStore } from '@/stores/petStore'
 import { useAuthStore } from '@/stores/authStore'
 import { AddPetModal } from '@/components/modals/AddPetModal'
+import { GlassContainer } from '@/components/ui/GlassContainer'
+import { OiPetLogo } from '@/components/ui/OiPetLogo'
 
 export const PetsPage: React.FC = () => {
   const { pets, fetchPets, isLoading } = usePetStore()
@@ -19,32 +23,35 @@ export const PetsPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-teal-50 to-cyan-100">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <div className="bg-white shadow-sm border-b">
+      <div className="bg-white/20 backdrop-blur-lg border-b border-white/30 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <OiPetLogo size="md" showText={true} />
+              <div className="hidden md:block">
+                <h1 className="text-xl font-bold text-gray-900">Meus Pets</h1>
+                <p className="text-sm text-gray-600">Gerencie seus pets</p>
+              </div>
+            </div>
             <div className="flex items-center space-x-4">
               <Link 
                 to="/app/dashboard"
-                className="text-teal-600 hover:text-teal-700 font-medium"
+                className="text-coral-600 hover:text-coral-700 font-medium text-sm"
               >
                 ← Dashboard
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900">
-                🐾 Meus Pets
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user?.name}
-              </span>
-              <button
-                onClick={logout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Sair
-              </button>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-coral-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">
+                    {user?.name?.[0] || 'U'}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.name || 'Usuário'}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -54,15 +61,21 @@ export const PetsPage: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         
         {/* Add Pet Button */}
-        <div className="mb-8">
-          <button 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <motion.button 
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
             onClick={() => setIsAddModalOpen(true)}
-            className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium flex items-center space-x-2 transition-colors"
+            className="btn-primary flex items-center space-x-2"
           >
-            <span>➕</span>
+            <PlusIcon className="h-5 w-5" />
             <span>Adicionar Pet</span>
-          </button>
-        </div>
+          </motion.button>
+        </motion.div>
 
         {/* Loading State */}
         {isLoading && (
@@ -74,31 +87,51 @@ export const PetsPage: React.FC = () => {
 
         {/* Empty State */}
         {!isLoading && pets.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">🐕</div>
-            <h3 className="text-xl font-medium text-gray-900 mb-2">
-              Nenhum pet cadastrado
-            </h3>
-            <p className="text-gray-600 mb-6">
-              Comece adicionando o seu primeiro pet para monitorar sua saúde!
-            </p>
-            <button 
-              onClick={() => setIsAddModalOpen(true)}
-              className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-            >
-              Adicionar Primeiro Pet
-            </button>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+          >
+            <GlassContainer className="text-center py-12">
+              <div className="text-6xl mb-4">🐕</div>
+              <h3 className="text-xl font-medium text-gray-900 mb-2">
+                Nenhum pet cadastrado
+              </h3>
+              <p className="text-gray-600 mb-6">
+                Comece adicionando o seu primeiro pet para monitorar sua saúde!
+              </p>
+              <motion.button 
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+                onClick={() => setIsAddModalOpen(true)}
+                className="btn-primary"
+              >
+                Adicionar Primeiro Pet
+              </motion.button>
+            </GlassContainer>
+          </motion.div>
         )}
 
         {/* Pets Grid */}
         {!isLoading && pets.length > 0 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pets.map((pet) => (
-              <div key={pet._id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200">
-                <div className="p-6">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+          >
+            {pets.map((pet, index) => (
+              <motion.div
+                key={pet._id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * index }}
+                whileHover={{ scale: 1.02 }}
+                className="cursor-pointer"
+              >
+                <GlassContainer className="p-6 hover:bg-white/20 transition-all duration-300">
                   <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-teal-100 rounded-full flex items-center justify-center">
+                    <div className="w-12 h-12 bg-gradient-to-r from-coral-500 to-teal-500 rounded-full flex items-center justify-center">
                       <span className="text-2xl">
                         {pet.species === 'dog' ? '🐕' : pet.species === 'cat' ? '🐱' : '🐾'}
                       </span>
@@ -113,78 +146,45 @@ export const PetsPage: React.FC = () => {
                     </div>
                   </div>
                   
-                  <div className="space-y-2 text-sm text-gray-600">
+                  <div className="space-y-2 text-sm text-gray-600 mb-4">
                     <div className="flex justify-between">
                       <span>Peso:</span>
-                      <span>{pet.weight}kg</span>
+                      <span className="font-medium">{pet.weight}kg</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Idade:</span>
-                      <span>{new Date().getFullYear() - new Date(pet.birthDate).getFullYear()} anos</span>
+                      <span className="font-medium">{new Date().getFullYear() - new Date(pet.birthDate).getFullYear()} anos</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Sexo:</span>
-                      <span>{pet.gender === 'male' ? 'Macho' : 'Fêmea'}</span>
+                      <span className="font-medium">{pet.gender === 'male' ? 'Macho' : 'Fêmea'}</span>
                     </div>
                   </div>
 
-                  <div className="mt-4 flex space-x-2">
-                    <button className="flex-1 bg-teal-50 text-teal-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-teal-100">
-                      Ver Detalhes
-                    </button>
-                    <button className="flex-1 bg-blue-50 text-blue-700 px-4 py-2 rounded-md text-sm font-medium hover:bg-blue-100">
-                      Saúde
-                    </button>
+                  <div className="flex space-x-2">
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-1 btn-glass text-sm flex items-center justify-center space-x-1"
+                    >
+                      <ChartBarIcon className="h-4 w-4" />
+                      <span>Detalhes</span>
+                    </motion.button>
+                    <motion.button 
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      className="flex-1 btn-secondary text-sm flex items-center justify-center space-x-1"
+                    >
+                      <HeartIcon className="h-4 w-4" />
+                      <span>Saúde</span>
+                    </motion.button>
                   </div>
-                </div>
-              </div>
+                </GlassContainer>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
 
-        {/* Mock Data for Demo */}
-        {!isLoading && pets.length === 0 && (
-          <div className="mt-8 text-center">
-            <p className="text-sm text-gray-500 mb-4">
-              Para demonstração, aqui estão alguns pets de exemplo:
-            </p>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                { name: 'Rex', species: 'dog', breed: 'Golden Retriever', weight: 30, gender: 'male' },
-                { name: 'Mimi', species: 'cat', breed: 'Siamês', weight: 4, gender: 'female' },
-                { name: 'Buddy', species: 'dog', breed: 'Labrador', weight: 28, gender: 'male' },
-              ].map((pet, index) => (
-                <div key={index} className="bg-white rounded-lg shadow-md p-6 opacity-50">
-                  <div className="flex items-center mb-4">
-                    <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center">
-                      <span className="text-2xl">
-                        {pet.species === 'dog' ? '🐕' : '🐱'}
-                      </span>
-                    </div>
-                    <div className="ml-4">
-                      <h3 className="text-lg font-medium text-gray-900">
-                        {pet.name}
-                      </h3>
-                      <p className="text-sm text-gray-500">
-                        {pet.breed}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="space-y-2 text-sm text-gray-600">
-                    <div className="flex justify-between">
-                      <span>Peso:</span>
-                      <span>{pet.weight}kg</span>
-                    </div>
-                    <div className="flex justify-between">
-                      <span>Sexo:</span>
-                      <span>{pet.gender === 'male' ? 'Macho' : 'Fêmea'}</span>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
       </div>
 
       {/* Add Pet Modal */}

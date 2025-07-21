@@ -1,7 +1,14 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { motion } from 'framer-motion'
 import { useAuthStore } from '@/stores/authStore'
-import { GlassContainer, GlassWidget } from '@/components/ui/GlassContainer-simple'
+import { GlassContainer } from '@/components/ui/GlassContainer'
+import { OiPetLogo } from '@/components/ui/OiPetLogo'
+
+// Temporary GlassWidget since we're using the simple version
+const GlassWidget: React.FC<{ children: React.ReactNode; className?: string }> = ({ children, className }) => (
+  <GlassContainer className={className}>{children}</GlassContainer>
+)
 
 export const HealthPage: React.FC = () => {
   const { user, logout } = useAuthStore()
@@ -50,32 +57,35 @@ export const HealthPage: React.FC = () => {
   const activityData = [65, 80, 70, 90, 85, 95, 88]
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50 to-indigo-100">
       {/* Header */}
-      <div className="bg-white/80 backdrop-blur-md shadow-sm border-b">
+      <div className="bg-white/20 backdrop-blur-lg border-b border-white/30 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-6">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-4">
+              <OiPetLogo size="md" showText={true} />
+              <div className="hidden md:block">
+                <h1 className="text-xl font-bold text-gray-900">Saúde dos Pets</h1>
+                <p className="text-sm text-gray-600">Monitore a saúde do seu pet</p>
+              </div>
+            </div>
             <div className="flex items-center space-x-4">
               <Link 
                 to="/app/dashboard"
-                className="text-indigo-600 hover:text-indigo-700 font-medium"
+                className="text-coral-600 hover:text-coral-700 font-medium text-sm"
               >
                 ← Dashboard
               </Link>
-              <h1 className="text-2xl font-bold text-gray-900">
-                ❤️ Saúde dos Pets
-              </h1>
-            </div>
-            <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">
-                {user?.name}
-              </span>
-              <button
-                onClick={logout}
-                className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md text-sm font-medium"
-              >
-                Sair
-              </button>
+              <div className="flex items-center space-x-2">
+                <div className="w-8 h-8 bg-coral-500 rounded-full flex items-center justify-center">
+                  <span className="text-white text-sm font-bold">
+                    {user?.name?.[0] || 'U'}
+                  </span>
+                </div>
+                <span className="text-sm font-medium text-gray-700">
+                  {user?.name || 'Usuário'}
+                </span>
+              </div>
             </div>
           </div>
         </div>

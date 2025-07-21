@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { Product, CartItem } from '@/services/ecommerceService'
+import { ecommerceAnalytics } from '@/services/ecommerceAnalytics'
 
 interface CartStore {
   items: CartItem[]
@@ -30,6 +31,9 @@ export const useCartStore = create<CartStore>()(
       isOpen: false,
 
       addItem: (product, quantity = 1, selectedWeight) => {
+        // Track analytics
+        ecommerceAnalytics.trackAddToCart(product.id, product.name, quantity, product.price)
+        
         set((state) => {
           const existingItemIndex = state.items.findIndex(
             (item) => 
@@ -55,6 +59,13 @@ export const useCartStore = create<CartStore>()(
       },
 
       removeItem: (productId) => {
+        const state = get()
+        const item = state.items.find(item => item.product.id === productId)
+        
+        if (item) {
+          ecommerceAnalytics.trackRemoveFromCart(item.product.id, item.product.name, item.quantity, item.product.price)
+        }
+        
         set((state) => ({
           items: state.items.filter(item => item.product.id !== productId)
         }))
@@ -80,6 +91,10 @@ export const useCartStore = create<CartStore>()(
       },
 
       toggleCart: () => {
+        const state = get()
+        if (!state.isOpen) {
+          ecommerceAnalytics.trackCartView()
+        }
         set((state) => ({ isOpen: !state.isOpen }))
       },
 
@@ -106,6 +121,17 @@ export const useCartStore = create<CartStore>()(
       redirectToOiPetCart: () => {
         const items = get().items
         if (items.length === 0) return
+        
+        // Track analytics
+        const cartItems = items.map(item => ({
+          productId: item.product.id,
+          productName: item.product.name,
+          quantity: item.quantity,
+          price: item.product.price
+        }))
+        
+        ecommerceAnalytics.trackCheckoutStart(cartItems)
+        ecommerceAnalytics.trackRedirectToOiPet(cartItems)
         
         // Build cart URL with items
         const cartData = items.map(item => ({

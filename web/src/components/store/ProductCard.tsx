@@ -3,37 +3,48 @@ import { motion } from 'framer-motion'
 import {
   HeartIcon,
   StarIcon,
-  ShoppingCartIcon,
+  ShoppingBagIcon,
   TagIcon,
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
 
 import { GlassCard } from '@/components/ui/GlassContainer'
-import { useCartStore } from '@/stores/cartStore'
 import { ecommerceService, type Product } from '@/services/ecommerceService'
+import { ecommerceAnalytics } from '@/services/ecommerceAnalytics'
 import { cn } from '@/lib/utils'
 
 interface ProductCardProps {
   product: Product
   isFavorite?: boolean
   onToggleFavorite?: () => void
+  onOpenWebView?: () => void
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   isFavorite = false,
-  onToggleFavorite
+  onToggleFavorite,
+  onOpenWebView
 }) => {
-  const { addItem, getItemCount } = useCartStore()
-  const itemCount = getItemCount(product.id)
-
-  const handleAddToCart = () => {
-    addItem(product, 1)
-  }
-
   const handleBuyNow = () => {
-    ecommerceService.redirectToOiPetStore(product.oipetUrl)
+    // Track analytics
+    ecommerceAnalytics.trackProductView(
+      product.id, 
+      product.name, 
+      product.category, 
+      product.price, 
+      'direct'
+    )
+    ecommerceAnalytics.trackWebViewOpened('product_card')
+    ecommerceAnalytics.trackHybridConversion('featured_products')
+    
+    if (onOpenWebView) {
+      onOpenWebView()
+    } else {
+      // Fallback para redirecionamento direto
+      ecommerceService.redirectToOiPetStore(product.oipetUrl)
+    }
   }
 
   const getPetTypeIcon = (petType: string) => {
@@ -122,15 +133,15 @@ export const ProductCard: React.FC<ProductCardProps> = ({
             </motion.button>
           )}
 
-          {/* Quick Add Button */}
+          {/* Quick Buy Button */}
           {product.inStock && (
             <motion.button
               initial={{ opacity: 0, y: 20 }}
               whileHover={{ opacity: 1, y: 0 }}
               className="absolute bottom-3 right-3 p-2 bg-coral-500 text-white rounded-glass opacity-0 group-hover:opacity-100 transition-all"
-              onClick={handleAddToCart}
+              onClick={handleBuyNow}
             >
-              <ShoppingCartIcon className="h-5 w-5" />
+              <ShoppingBagIcon className="h-5 w-5" />
             </motion.button>
           )}
         </div>
@@ -220,42 +231,23 @@ export const ProductCard: React.FC<ProductCardProps> = ({
               </p>
             )}
 
-            {/* Action Buttons */}
-            <div className="space-y-2">
-              {product.inStock ? (
-                <>
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleAddToCart}
-                    className="w-full flex items-center justify-center space-x-2 bg-coral-500 text-white py-2 px-4 rounded-glass hover:bg-coral-600 transition-colors font-medium"
-                  >
-                    <ShoppingCartIcon className="h-4 w-4" />
-                    <span>
-                      {itemCount > 0 ? `Adicionar (${itemCount})` : 'Adicionar'}
-                    </span>
-                  </motion.button>
-                  
-                  <motion.button
-                    whileHover={{ scale: 1.02 }}
-                    whileTap={{ scale: 0.98 }}
-                    onClick={handleBuyNow}
-                    className="w-full bg-white/50 text-gray-700 py-2 px-4 rounded-glass border border-gray-200 hover:bg-white/70 transition-colors font-medium"
-                  >
-                    Comprar na OiPet
-                  </motion.button>
-                </>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  onClick={handleBuyNow}
-                  className="w-full bg-gray-500 text-white py-2 px-4 rounded-glass hover:bg-gray-600 transition-colors font-medium"
-                >
-                  Ver na OiPet
-                </motion.button>
+            {/* Action Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={handleBuyNow}
+              className={cn(
+                "w-full flex items-center justify-center space-x-2 py-3 px-4 rounded-glass font-medium transition-colors",
+                product.inStock
+                  ? "bg-coral-500 text-white hover:bg-coral-600"
+                  : "bg-gray-500 text-white hover:bg-gray-600"
               )}
-            </div>
+            >
+              <ShoppingBagIcon className="h-5 w-5" />
+              <span>
+                {product.inStock ? 'Comprar na OiPet' : 'Ver na OiPet'}
+              </span>
+            </motion.button>
           </div>
         </div>
       </GlassCard>

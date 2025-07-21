@@ -18,7 +18,7 @@ import { GlassContainer, GlassCard, GlassWidget } from '@/components/ui/GlassCon
 import { ReportFilters } from '@/components/reports/ReportFilters'
 import { ReportPreview } from '@/components/reports/ReportPreview'
 import { ExportModal } from '@/components/reports/ExportModal'
-import { reportService, type ReportFilter, type ReportData } from '@/services/reportService'
+import { reportServiceReal as reportService, type ReportFilter, type ReportData } from '@/services/reportServiceReal'
 import { usePetStore } from '@/stores/petStore'
 import { cn } from '@/lib/utils'
 
@@ -84,6 +84,27 @@ export const ReportsPage: React.FC = () => {
       setReportData(data)
     } catch (error) {
       console.error('Erro ao gerar relatório:', error)
+      // Criar dados mock em caso de erro
+      const mockData = {
+        metadata: {
+          title: 'Erro no Relatório',
+          subtitle: 'Erro ao carregar dados',
+          period: 'N/A',
+          generatedAt: new Date().toISOString(),
+          petCount: 0,
+          recordCount: 0,
+          reportType: filter.reportType
+        },
+        sections: [],
+        summary: {
+          totalRecords: 0,
+          healthScore: 0,
+          trends: [],
+          recommendations: ['Erro ao carregar dados de saúde']
+        },
+        pets: []
+      }
+      setReportData(mockData)
     } finally {
       setLoading(false)
     }

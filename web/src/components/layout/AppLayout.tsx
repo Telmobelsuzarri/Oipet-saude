@@ -31,7 +31,7 @@ export const AppLayout: React.FC = () => {
     { name: 'Meus Pets', href: '/app/pets', icon: HeartIcon },
     { name: 'Saúde', href: '/app/health', icon: ChartBarIcon },
     { name: 'Scanner', href: '/app/scanner', icon: CameraIcon },
-    { name: 'Loja', href: '/app/store', icon: ShoppingCartIcon },
+    { name: 'Produtos OiPet', href: '/app/store', icon: ShoppingCartIcon },
     { name: 'Relatórios', href: '/app/reports', icon: DocumentTextIcon },
     { name: 'Notificações', href: '/app/notifications', icon: BellIcon },
     { name: 'Perfil', href: '/app/profile', icon: UserIcon },
@@ -41,7 +41,9 @@ export const AppLayout: React.FC = () => {
   const adminNavigation = user?.isAdmin ? [
     { name: 'Admin Dashboard', href: '/app/admin/dashboard', icon: ChartBarIcon },
     { name: 'Usuários', href: '/app/admin/users', icon: UserIcon },
+    { name: 'Pets', href: '/app/admin/pets', icon: HeartIcon },
     { name: 'Analytics', href: '/app/admin/analytics', icon: ChartBarIcon },
+    { name: 'E-commerce Analytics', href: '/app/admin/ecommerce', icon: ShoppingCartIcon },
   ] : []
 
   return (

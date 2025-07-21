@@ -27,6 +27,7 @@ import userRoutes from '@/routes/users';
 import petRoutes from '@/routes/pets';
 import healthRoutes from '@/routes/health-simple';
 import notificationRoutes from '@/routes/notifications-simple';
+import analyticsRoutes from '@/routes/analytics';
 import adminRoutes from '@/routes/admin';
 
 // Debug removido - servidor funcionando!
@@ -93,6 +94,7 @@ app.use('/api/users', userRoutes);
 app.use('/api/pets', petRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 
 // Documentação Swagger

@@ -17,7 +17,7 @@ import { useNavigation, useFocusEffect } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { GlassContainer } from '../../components/ui/GlassContainer';
-import { COLORS } from '../../constants/theme';
+import { COLORS, TYPOGRAPHY, SPACING } from '../../constants/theme';
 import { PetService } from '../../services/PetService';
 
 interface Pet {
@@ -108,7 +108,7 @@ export const PetsScreen: React.FC = () => {
                 <Ionicons 
                   name={getSpeciesIcon(item.species)} 
                   size={32} 
-                  color={COLORS.text.secondary} 
+                  color={COLORS.system.text.secondary} 
                 />
               </View>
             )}
@@ -164,7 +164,7 @@ export const PetsScreen: React.FC = () => {
   const renderEmptyState = () => (
     <View style={styles.emptyContainer}>
       <GlassContainer variant="widget" style={styles.emptyContent}>
-        <Ionicons name="paw" size={64} color={COLORS.text.secondary} />
+        <Ionicons name="paw" size={64} color={COLORS.system.text.secondary} />
         <Text style={styles.emptyTitle}>Nenhum pet cadastrado</Text>
         <Text style={styles.emptyMessage}>
           Adicione seu primeiro pet para começar a monitorar sua saúde e bem-estar
@@ -218,19 +218,19 @@ export const PetsScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: COLORS.background.primary,
-    padding: 16,
+    backgroundColor: COLORS.system.background,
+    padding: SPACING.lg,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 24,
+    marginBottom: SPACING['2xl'],
   },
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize['3xl'],
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   addButton: {
     width: 44,
@@ -240,21 +240,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   petCard: {
-    marginBottom: 16,
+    marginBottom: SPACING.lg,
   },
   cardContent: {
-    padding: 16,
+    padding: SPACING.lg,
   },
   petHeader: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: SPACING.md,
   },
   petImageContainer: {
-    marginRight: 12,
+    marginRight: SPACING.md,
   },
   petImage: {
     width: 60,
@@ -269,112 +269,117 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 2,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   petInfo: {
     flex: 1,
   },
   petName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.lg,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
     marginBottom: 2,
   },
   petBreed: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.secondary,
     marginBottom: 2,
   },
   petDetails: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
   },
   petStats: {
     alignItems: 'center',
   },
   statItem: {
     alignItems: 'center',
-    marginBottom: 4,
+    marginBottom: SPACING.xs,
   },
   statValue: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
+    fontSize: TYPOGRAPHY.fontSize.base,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
   },
   statLabel: {
     fontSize: 10,
-    color: COLORS.text.secondary,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
   },
   cardFooter: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingTop: 12,
+    paddingTop: SPACING.md,
     borderTopWidth: 1,
-    borderTopColor: COLORS.border.primary,
+    borderTopColor: COLORS.system.border.light,
   },
   genderIndicator: {
     flexDirection: 'row',
     alignItems: 'center',
   },
   genderText: {
-    fontSize: 12,
-    color: COLORS.text.secondary,
-    marginLeft: 4,
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
+    marginLeft: SPACING.xs,
   },
   quickActionButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.glass.widget,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.xs,
     borderRadius: 8,
     borderWidth: 1,
-    borderColor: COLORS.border.primary,
+    borderColor: COLORS.system.border.light,
   },
   quickActionText: {
-    fontSize: 12,
-    color: COLORS.text.primary,
-    marginLeft: 4,
-    fontWeight: '500',
+    fontSize: TYPOGRAPHY.fontSize.xs,
+    fontFamily: TYPOGRAPHY.fontFamily.medium,
+    color: COLORS.system.text.primary,
+    marginLeft: SPACING.xs,
   },
   emptyContainer: {
     flex: 1,
     justifyContent: 'center',
-    paddingHorizontal: 32,
+    paddingHorizontal: SPACING['3xl'],
   },
   emptyList: {
     flexGrow: 1,
   },
   emptyContent: {
-    padding: 32,
+    padding: SPACING['3xl'],
     alignItems: 'center',
   },
   emptyTitle: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: COLORS.text.primary,
-    marginTop: 16,
-    marginBottom: 8,
+    fontSize: TYPOGRAPHY.fontSize.xl,
+    fontFamily: TYPOGRAPHY.fontFamily.bold,
+    color: COLORS.system.text.primary,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.sm,
   },
   emptyMessage: {
-    fontSize: 14,
-    color: COLORS.text.secondary,
+    fontSize: TYPOGRAPHY.fontSize.sm,
+    fontFamily: TYPOGRAPHY.fontFamily.regular,
+    color: COLORS.system.text.secondary,
     textAlign: 'center',
-    lineHeight: 20,
-    marginBottom: 24,
+    lineHeight: TYPOGRAPHY.lineHeight.normal * TYPOGRAPHY.fontSize.sm,
+    marginBottom: SPACING['2xl'],
   },
   addPetButton: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: COLORS.primary.coral,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
+    paddingHorizontal: SPACING['2xl'],
+    paddingVertical: SPACING.md,
     borderRadius: 8,
   },
   addPetButtonText: {
-    color: COLORS.background.primary,
-    fontWeight: '600',
-    marginLeft: 8,
+    color: COLORS.system.text.inverse,
+    fontFamily: TYPOGRAPHY.fontFamily.semiBold,
+    marginLeft: SPACING.sm,
   },
 });

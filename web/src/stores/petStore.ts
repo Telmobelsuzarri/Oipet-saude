@@ -28,6 +28,7 @@ interface PetState {
   updatePet: (petId: string, petData: Partial<Pet>) => Promise<void>
   deletePet: (petId: string) => Promise<void>
   selectPet: (pet: Pet | null) => void
+  setSelectedPet: (pet: Pet | null) => void
 }
 
 interface CreatePetData {
@@ -142,6 +143,10 @@ export const usePetStore = create<PetState>()(
       },
 
       selectPet: (pet: Pet | null) => {
+        set({ selectedPet: pet })
+      },
+
+      setSelectedPet: (pet: Pet | null) => {
         set({ selectedPet: pet })
       },
     }),

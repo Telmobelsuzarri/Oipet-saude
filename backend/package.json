@@ -18,6 +18,7 @@
     "migrate": "ts-node src/scripts/migrate.ts"
   },
   "dependencies": {
+    "@sendgrid/mail": "^8.1.5",
     "@types/express": "^4.17.17",
     "@types/node": "^20.5.7",
     "bcryptjs": "^2.4.3",
@@ -35,7 +36,7 @@
     "mongodb-memory-server": "^10.1.4",
     "mongoose": "^7.5.0",
     "multer": "^1.4.5-lts.1",
-    "nodemailer": "^6.9.4",
+    "nodemailer": "^6.10.1",
     "redis": "^4.6.8",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.0",

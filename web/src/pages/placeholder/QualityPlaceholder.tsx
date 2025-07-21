@@ -112,21 +112,22 @@ export const PetDetailPage = () => (
   />
 )
 
-export const FoodScannerPage = () => (
-  <QualityPlaceholder
-    title="Scanner de Alimentos"
-    description="Escaneie alimentos e receba informações nutricionais personalizadas para seu pet."
-    icon="📷"
-    features={[
-      'Reconhecimento por IA',
-      'Análise nutricional',
-      'Compatibilidade com pets',
-      'Histórico de escaneamentos',
-      'Recomendações personalizadas',
-      'Alertas de ingredientes'
-    ]}
-  />
-)
+// FoodScannerPage now has real implementation in scanner folder
+// export const FoodScannerPage = () => (
+//   <QualityPlaceholder
+//     title="Scanner de Alimentos"
+//     description="Escaneie alimentos e receba informações nutricionais personalizadas para seu pet."
+//     icon="📷"
+//     features={[
+//       'Reconhecimento por IA',
+//       'Análise nutricional',
+//       'Compatibilidade com pets',
+//       'Histórico de escaneamentos',
+//       'Recomendações personalizadas',
+//       'Alertas de ingredientes'
+//     ]}
+//   />
+// )
 
 export const StorePage = () => (
   <QualityPlaceholder
