@@ -6,6 +6,9 @@
  */
 
 console.log('🚀 Starting OiPet Saúde Backend...');
+console.log('📍 Environment:', process.env.NODE_ENV || 'production');
+console.log('🔧 Port:', process.env.PORT || '3001');
+console.log('🗄️  MongoDB URI:', process.env.MONGODB_URI ? 'Configured' : 'NOT CONFIGURED!');
 
 // Load environment variables
 require('dotenv').config();
