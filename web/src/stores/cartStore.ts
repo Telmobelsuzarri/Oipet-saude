@@ -1,16 +1,24 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { Product, CartItem } from '@/services/ecommerceService'
-import { ecommerceAnalytics } from '@/services/ecommerceAnalytics'
+import type { Product } from '@/services/ecommerce'
+
+interface CartItem {
+  id: string
+  name: string
+  price: number
+  quantity: number
+  imageUrl: string
+  url: string
+}
 
 interface CartStore {
   items: CartItem[]
   isOpen: boolean
   
   // Actions
-  addItem: (product: Product, quantity?: number, selectedWeight?: string) => void
-  removeItem: (productId: string) => void
-  updateQuantity: (productId: string, quantity: number) => void
+  addItem: (item: Omit<CartItem, 'quantity'> & { quantity?: number }) => void
+  removeItem: (id: string) => void
+  updateQuantity: (id: string, quantity: number) => void
   clearCart: () => void
   toggleCart: () => void
   setCartOpen: (open: boolean) => void
@@ -18,27 +26,24 @@ interface CartStore {
   // Computed values
   getTotalItems: () => number
   getTotalPrice: () => number
-  getItemCount: (productId: string) => number
+  getItemCount: (id: string) => number
   
   // E-commerce integration
   redirectToOiPetCart: () => void
 }
 
-export const useCartStore = create<CartStore>()(
+export const cartStore = create<CartStore>()(
   persist(
     (set, get) => ({
       items: [],
       isOpen: false,
 
-      addItem: (product, quantity = 1, selectedWeight) => {
-        // Track analytics
-        ecommerceAnalytics.trackAddToCart(product.id, product.name, quantity, product.price)
+      addItem: (item) => {
+        const quantity = item.quantity || 1
         
         set((state) => {
           const existingItemIndex = state.items.findIndex(
-            (item) => 
-              item.product.id === product.id && 
-              item.selectedWeight === selectedWeight
+            (existingItem) => existingItem.id === item.id
           )
 
           if (existingItemIndex > -1) {
@@ -49,37 +54,33 @@ export const useCartStore = create<CartStore>()(
           } else {
             // Add new item
             const newItem: CartItem = {
-              product,
+              id: item.id,
+              name: item.name,
+              price: item.price,
               quantity,
-              selectedWeight
+              imageUrl: item.imageUrl,
+              url: item.url
             }
             return { items: [...state.items, newItem] }
           }
         })
       },
 
-      removeItem: (productId) => {
-        const state = get()
-        const item = state.items.find(item => item.product.id === productId)
-        
-        if (item) {
-          ecommerceAnalytics.trackRemoveFromCart(item.product.id, item.product.name, item.quantity, item.product.price)
-        }
-        
+      removeItem: (id) => {
         set((state) => ({
-          items: state.items.filter(item => item.product.id !== productId)
+          items: state.items.filter(item => item.id !== id)
         }))
       },
 
-      updateQuantity: (productId, quantity) => {
+      updateQuantity: (id, quantity) => {
         if (quantity <= 0) {
-          get().removeItem(productId)
+          get().removeItem(id)
           return
         }
 
         set((state) => ({
           items: state.items.map(item =>
-            item.product.id === productId
+            item.id === id
               ? { ...item, quantity }
               : item
           )
@@ -91,10 +92,6 @@ export const useCartStore = create<CartStore>()(
       },
 
       toggleCart: () => {
-        const state = get()
-        if (!state.isOpen) {
-          ecommerceAnalytics.trackCartView()
-        }
         set((state) => ({ isOpen: !state.isOpen }))
       },
 
@@ -108,13 +105,13 @@ export const useCartStore = create<CartStore>()(
 
       getTotalPrice: () => {
         return get().items.reduce(
-          (total, item) => total + (item.product.price * item.quantity), 
+          (total, item) => total + (item.price * item.quantity), 
           0
         )
       },
 
-      getItemCount: (productId) => {
-        const item = get().items.find(item => item.product.id === productId)
+      getItemCount: (id) => {
+        const item = get().items.find(item => item.id === id)
         return item ? item.quantity : 0
       },
 
@@ -122,22 +119,10 @@ export const useCartStore = create<CartStore>()(
         const items = get().items
         if (items.length === 0) return
         
-        // Track analytics
-        const cartItems = items.map(item => ({
-          productId: item.product.id,
-          productName: item.product.name,
-          quantity: item.quantity,
-          price: item.product.price
-        }))
-        
-        ecommerceAnalytics.trackCheckoutStart(cartItems)
-        ecommerceAnalytics.trackRedirectToOiPet(cartItems)
-        
         // Build cart URL with items
         const cartData = items.map(item => ({
-          id: item.product.id,
-          quantity: item.quantity,
-          weight: item.selectedWeight
+          id: item.id,
+          quantity: item.quantity
         }))
         
         // Redirect to OiPet store with cart data

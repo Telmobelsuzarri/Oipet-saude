@@ -2,16 +2,19 @@ import { create } from 'zustand'
 
 export interface Notification {
   id: string
-  type: 'reminder' | 'appointment' | 'health' | 'achievement' | 'system'
+  type: 'reminder' | 'appointment' | 'health' | 'achievement' | 'system' | 'stock_alert'
   title: string
   message: string
   priority: 'low' | 'medium' | 'high'
   petId?: string
   petName?: string
   isRead: boolean
+  read?: boolean // Para compatibilidade com notificações do foodGalleryService
   createdAt: Date
+  timestamp?: Date // Para compatibilidade com notificações do foodGalleryService
   scheduledFor?: Date
   actionUrl?: string
+  data?: any // Dados adicionais específicos do tipo de notificação
 }
 
 interface NotificationState {
@@ -33,152 +36,141 @@ interface NotificationActions {
 
 const generateId = () => Math.random().toString(36).substr(2, 9)
 
-// Mock data for notifications
-const mockNotifications: Notification[] = [
-  {
-    id: '1',
-    type: 'reminder',
-    title: 'Hora da medicação do Rex',
-    message: 'Não esqueça de dar o medicamento para hipertensão',
-    priority: 'high',
-    petId: '1',
-    petName: 'Rex',
-    isRead: false,
-    createdAt: new Date('2025-01-15T09:00:00Z'),
-    scheduledFor: new Date('2025-01-15T14:00:00Z'),
-    actionUrl: '/app/pets/1'
-  },
-  {
-    id: '2',
-    type: 'appointment',
-    title: 'Consulta veterinária - Mimi',
-    message: 'Consulta de rotina agendada para amanhã às 14:00',
-    priority: 'medium',
-    petId: '2',
-    petName: 'Mimi',
-    isRead: false,
-    createdAt: new Date('2025-01-14T10:00:00Z'),
-    scheduledFor: new Date('2025-01-16T14:00:00Z'),
-    actionUrl: '/app/pets/2'
-  },
-  {
-    id: '3',
-    type: 'health',
-    title: 'Peso do Rex aumentou',
-    message: 'O peso do Rex aumentou 0.5kg desde a última medição',
-    priority: 'medium',
-    petId: '1',
-    petName: 'Rex',
-    isRead: true,
-    createdAt: new Date('2025-01-13T16:30:00Z'),
-    actionUrl: '/app/health'
-  },
-  {
-    id: '4',
-    type: 'achievement',
-    title: 'Meta de exercícios atingida!',
-    message: 'Rex completou 30 minutos de exercícios hoje',
-    priority: 'low',
-    petId: '1',
-    petName: 'Rex',
-    isRead: true,
-    createdAt: new Date('2025-01-12T18:00:00Z'),
-    actionUrl: '/app/health'
-  },
-  {
-    id: '5',
-    type: 'system',
-    title: 'Atualizações do OiPet',
-    message: 'Novas funcionalidades disponíveis no aplicativo',
-    priority: 'low',
-    isRead: false,
-    createdAt: new Date('2025-01-11T12:00:00Z'),
-    actionUrl: '/app/settings'
-  }
-]
-
-export const useNotificationStore = create<NotificationState & NotificationActions>((set, get) => ({
-  notifications: mockNotifications,
-  unreadCount: mockNotifications.filter(n => !n.isRead).length,
-  isLoading: false,
-  error: null,
-
-  addNotification: (notificationData) => {
-    const newNotification: Notification = {
-      ...notificationData,
-      id: generateId(),
-      createdAt: new Date(),
-      isRead: false
-    }
+// Função para carregar notificações do localStorage
+const loadNotificationsFromStorage = (): Notification[] => {
+  try {
+    const storedNotifications = localStorage.getItem('oipet_notifications')
+    if (!storedNotifications) return []
     
-    set(state => ({
-      notifications: [newNotification, ...state.notifications],
-      unreadCount: state.unreadCount + 1
+    const notifications = JSON.parse(storedNotifications)
+    return notifications.map((notif: any) => ({
+      ...notif,
+      // Normalizar campos para o formato esperado
+      isRead: notif.isRead ?? notif.read ?? false,
+      createdAt: notif.createdAt ? new Date(notif.createdAt) : (notif.timestamp ? new Date(notif.timestamp) : new Date()),
+      timestamp: notif.timestamp ? new Date(notif.timestamp) : undefined,
+      scheduledFor: notif.scheduledFor ? new Date(notif.scheduledFor) : undefined,
+      priority: notif.priority || 'medium',
+      // Adicionar URL de ação para notificações de estoque
+      actionUrl: notif.type === 'stock_alert' ? '/app/gallery' : notif.actionUrl
     }))
-  },
+  } catch (error) {
+    console.error('Erro ao carregar notificações:', error)
+    return []
+  }
+}
 
-  markAsRead: (id) => {
-    set(state => ({
-      notifications: state.notifications.map(notification =>
-        notification.id === id
-          ? { ...notification, isRead: true }
-          : notification
-      ),
-      unreadCount: Math.max(0, state.unreadCount - 1)
-    }))
-  },
+// Função para salvar notificações no localStorage
+const saveNotificationsToStorage = (notifications: Notification[]) => {
+  try {
+    localStorage.setItem('oipet_notifications', JSON.stringify(notifications))
+  } catch (error) {
+    console.error('Erro ao salvar notificações:', error)
+  }
+}
 
-  markAllAsRead: () => {
-    set(state => ({
-      notifications: state.notifications.map(notification => ({
-        ...notification,
-        isRead: true
-      })),
-      unreadCount: 0
-    }))
-  },
+export const useNotificationStore = create<NotificationState & NotificationActions>((set, get) => {
+  // Carregar notificações do localStorage na inicialização
+  const initialNotifications = loadNotificationsFromStorage()
+  
+  return {
+    notifications: initialNotifications,
+    unreadCount: initialNotifications.filter(n => !n.isRead).length,
+    isLoading: false,
+    error: null,
 
-  deleteNotification: (id) => {
-    set(state => {
-      const notification = state.notifications.find(n => n.id === id)
-      const wasUnread = notification && !notification.isRead
-      
-      return {
-        notifications: state.notifications.filter(n => n.id !== id),
-        unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount
+    addNotification: (notificationData) => {
+      const newNotification: Notification = {
+        ...notificationData,
+        id: generateId(),
+        createdAt: new Date(),
+        isRead: false
       }
-    })
-  },
-
-  clearAll: () => {
-    set({
-      notifications: [],
-      unreadCount: 0
-    })
-  },
-
-  fetchNotifications: async () => {
-    set({ isLoading: true, error: null })
-    
-    try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
       
-      // In a real app, this would be an API call
-      set({
-        notifications: mockNotifications,
-        unreadCount: mockNotifications.filter(n => !n.isRead).length,
-        isLoading: false
+      set(state => {
+        const updatedNotifications = [newNotification, ...state.notifications]
+        saveNotificationsToStorage(updatedNotifications)
+        return {
+          notifications: updatedNotifications,
+          unreadCount: state.unreadCount + 1
+        }
       })
-    } catch (error) {
-      set({
-        error: 'Erro ao carregar notificações',
-        isLoading: false
-      })
-    }
-  },
+    },
 
-  getUnreadCount: () => {
-    return get().unreadCount
+    markAsRead: (id) => {
+      set(state => {
+        const updatedNotifications = state.notifications.map(notification =>
+          notification.id === id
+            ? { ...notification, isRead: true, read: true }
+            : notification
+        )
+        saveNotificationsToStorage(updatedNotifications)
+        return {
+          notifications: updatedNotifications,
+          unreadCount: Math.max(0, state.unreadCount - 1)
+        }
+      })
+    },
+
+    markAllAsRead: () => {
+      set(state => {
+        const updatedNotifications = state.notifications.map(notification => ({
+          ...notification,
+          isRead: true,
+          read: true
+        }))
+        saveNotificationsToStorage(updatedNotifications)
+        return {
+          notifications: updatedNotifications,
+          unreadCount: 0
+        }
+      })
+    },
+
+    deleteNotification: (id) => {
+      set(state => {
+        const notification = state.notifications.find(n => n.id === id)
+        const wasUnread = notification && !notification.isRead
+        const updatedNotifications = state.notifications.filter(n => n.id !== id)
+        saveNotificationsToStorage(updatedNotifications)
+        
+        return {
+          notifications: updatedNotifications,
+          unreadCount: wasUnread ? Math.max(0, state.unreadCount - 1) : state.unreadCount
+        }
+      })
+    },
+
+    clearAll: () => {
+      saveNotificationsToStorage([])
+      set({
+        notifications: [],
+        unreadCount: 0
+      })
+    },
+
+    fetchNotifications: async () => {
+      set({ isLoading: true, error: null })
+      
+      try {
+        // Recarregar notificações do localStorage
+        const notifications = loadNotificationsFromStorage()
+        
+        set({
+          notifications,
+          unreadCount: notifications.filter(n => !n.isRead).length,
+          isLoading: false
+        })
+      } catch (error) {
+        set({
+          error: 'Erro ao carregar notificações',
+          isLoading: false
+        })
+      }
+    },
+
+    getUnreadCount: () => {
+      return get().unreadCount
+    }
   }
-}))
+})

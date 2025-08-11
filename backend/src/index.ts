@@ -25,10 +25,12 @@ import { notFound } from '@/middleware/notFound';
 import authRoutes from '@/routes/auth';
 import userRoutes from '@/routes/users';
 import petRoutes from '@/routes/pets';
-import healthRoutes from '@/routes/health-simple';
-import notificationRoutes from '@/routes/notifications-simple';
+import healthRoutes from '@/routes/health';
+import notificationRoutes from '@/routes/notifications';
 import analyticsRoutes from '@/routes/analytics';
 import adminRoutes from '@/routes/admin';
+import productRoutes from '@/routes/products';
+import ecommerceAnalyticsRoutes from '@/routes/ecommerce-analytics';
 
 // Debug removido - servidor funcionando!
 
@@ -96,6 +98,8 @@ app.use('/api/health', healthRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/products', productRoutes);
+app.use('/api/ecommerce-analytics', ecommerceAnalyticsRoutes);
 
 // Documentação Swagger
 setupSwagger(app);

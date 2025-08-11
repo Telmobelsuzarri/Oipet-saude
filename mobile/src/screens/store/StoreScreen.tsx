@@ -16,118 +16,62 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context'
 import Icon from 'react-native-vector-icons/Ionicons'
 import { COLORS, TYPOGRAPHY, SPACING } from '@/constants/theme'
+import { ecommerceService, Product, ProductFilter } from '@/services/ecommerce'
 
-interface Product {
-  id: string
-  name: string
-  description: string
-  price: number
-  originalPrice?: number
-  discount?: number
-  category: 'ração' | 'petiscos' | 'brinquedos' | 'acessórios' | 'higiene' | 'saúde'
-  petType: 'dog' | 'cat' | 'both'
-  ageGroup: 'filhote' | 'adulto' | 'idoso' | 'todas'
-  imageUrl: string
-  rating: number
-  reviewCount: number
-  inStock: boolean
-  weight?: string
-  tags: string[]
-  oipetUrl: string
-}
+// Usando interface Product do service
 
-const mockProducts: Product[] = [
-  {
-    id: 'racao-premium-adulto',
-    name: 'Ração Premium Cães Adultos',
-    description: 'Ração super premium para cães adultos com ingredientes naturais e alta digestibilidade.',
-    price: 89.90,
-    originalPrice: 99.90,
-    discount: 10,
-    category: 'ração',
-    petType: 'dog',
-    ageGroup: 'adulto',
-    imageUrl: 'https://images.unsplash.com/photo-1589924691995-400dc9ecc119?w=300',
-    rating: 4.8,
-    reviewCount: 127,
-    inStock: true,
-    weight: '10kg',
-    tags: ['premium', 'natural', 'digestível'],
-    oipetUrl: 'https://oipetcomidadeverdade.com.br/para-cachorros/racao-premium-adulto'
-  },
-  {
-    id: 'petisco-natural-frango',
-    name: 'Petisco Natural de Frango',
-    description: 'Petisco 100% natural de frango desidratado, sem conservantes artificiais.',
-    price: 24.90,
-    category: 'petiscos',
-    petType: 'both',
-    ageGroup: 'todas',
-    imageUrl: 'https://images.unsplash.com/photo-1558929996-da64ba858215?w=300',
-    rating: 4.9,
-    reviewCount: 89,
-    inStock: true,
-    weight: '100g',
-    tags: ['natural', '100% frango', 'sem conservantes'],
-    oipetUrl: 'https://oipetcomidadeverdade.com.br/petiscos/natural-frango'
-  },
-  {
-    id: 'racao-gatos-filhotes',
-    name: 'Ração Especial Gatos Filhotes',
-    description: 'Ração desenvolvida especialmente para gatos filhotes com DHA e nutrientes essenciais.',
-    price: 67.90,
-    category: 'ração',
-    petType: 'cat',
-    ageGroup: 'filhote',
-    imageUrl: 'https://images.unsplash.com/photo-1574158622682-e40e69881006?w=300',
-    rating: 4.7,
-    reviewCount: 63,
-    inStock: true,
-    weight: '7.5kg',
-    tags: ['filhotes', 'DHA', 'desenvolvimento'],
-    oipetUrl: 'https://oipetcomidadeverdade.com.br/para-gatos/racao-filhotes'
-  },
-  {
-    id: 'brinquedo-corda',
-    name: 'Brinquedo de Corda Natural',
-    description: 'Brinquedo de corda 100% natural para cães, ajuda na limpeza dos dentes.',
-    price: 19.90,
-    category: 'brinquedos',
-    petType: 'dog',
-    ageGroup: 'todas',
-    imageUrl: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=300',
-    rating: 4.5,
-    reviewCount: 94,
-    inStock: true,
-    tags: ['natural', 'dentes', 'resistente'],
-    oipetUrl: 'https://oipetcomidadeverdade.com.br/brinquedos/corda-natural'
-  }
-]
+// Dados carregados da API
 
 const categories = [
   { id: 'all', name: 'Todos', icon: 'grid-outline', emoji: '🏪' },
-  { id: 'ração', name: 'Ração', icon: 'restaurant-outline', emoji: '🥘' },
+  { id: 'para-cachorros', name: 'Cães', icon: 'paw-outline', emoji: '🐕' },
+  { id: 'para-gatos', name: 'Gatos', icon: 'paw-outline', emoji: '🐱' },
   { id: 'petiscos', name: 'Petiscos', icon: 'fish-outline', emoji: '🦴' },
   { id: 'brinquedos', name: 'Brinquedos', icon: 'football-outline', emoji: '🎾' },
-  { id: 'acessórios', name: 'Acessórios', icon: 'bag-outline', emoji: '🎒' },
-  { id: 'higiene', name: 'Higiene', icon: 'water-outline', emoji: '🧴' },
-  { id: 'saúde', name: 'Saúde', icon: 'medical-outline', emoji: '💊' }
+  { id: 'acessorios', name: 'Acessórios', icon: 'bag-outline', emoji: '🎒' }
 ]
 
 export const StoreScreen: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>(mockProducts)
-  const [filteredProducts, setFilteredProducts] = useState<Product[]>(mockProducts)
+  const [products, setProducts] = useState<Product[]>([])
+  const [filteredProducts, setFilteredProducts] = useState<Product[]>([])
   const [searchTerm, setSearchTerm] = useState('')
   const [selectedCategory, setSelectedCategory] = useState('all')
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(true)
   const [showFilters, setShowFilters] = useState(false)
   const [selectedPetType, setSelectedPetType] = useState('all')
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [showProductModal, setShowProductModal] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    loadProducts()
+  }, [])
 
   useEffect(() => {
     filterProducts()
-  }, [searchTerm, selectedCategory, selectedPetType])
+  }, [searchTerm, selectedCategory, selectedPetType, products])
+
+  const loadProducts = async () => {
+    try {
+      setIsLoading(true)
+      setError(null)
+      
+      const filters: ProductFilter = {
+        limit: 50,
+        sortBy: 'rating',
+        sortOrder: 'desc'
+      }
+      
+      const response = await ecommerceService.getProducts(filters)
+      setProducts(response.products)
+      setFilteredProducts(response.products)
+    } catch (err) {
+      console.error('Erro ao carregar produtos:', err)
+      setError('Erro ao carregar produtos. Tente novamente.')
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
   const filterProducts = () => {
     let filtered = [...products]
@@ -160,9 +104,10 @@ export const StoreScreen: React.FC = () => {
 
   const handleBuyProduct = async (product: Product) => {
     try {
-      const canOpen = await Linking.canOpenURL(product.oipetUrl)
+      const productUrl = ecommerceService.generateProductUrl(product)
+      const canOpen = await Linking.canOpenURL(productUrl)
       if (canOpen) {
-        await Linking.openURL(product.oipetUrl)
+        await Linking.openURL(productUrl)
       } else {
         Alert.alert(
           'Erro',
@@ -239,9 +184,9 @@ export const StoreScreen: React.FC = () => {
         {/* Rating */}
         <View style={styles.ratingContainer}>
           <View style={styles.starsContainer}>
-            {renderStars(item.rating)}
+            {renderStars(Math.floor(item.rating || 0))}
           </View>
-          <Text style={styles.reviewCount}>({item.reviewCount})</Text>
+          <Text style={styles.reviewCount}>({item.reviews || 0})</Text>
         </View>
 
         {/* Weight */}
@@ -330,9 +275,9 @@ export const StoreScreen: React.FC = () => {
               )}
 
               <View style={styles.modalTags}>
-                {selectedProduct.tags.map((tag, index) => (
+                {selectedProduct.ingredients && selectedProduct.ingredients.map((ingredient, index) => (
                   <View key={index} style={styles.tag}>
-                    <Text style={styles.tagText}>{tag}</Text>
+                    <Text style={styles.tagText}>{ingredient}</Text>
                   </View>
                 ))}
               </View>
@@ -449,10 +394,7 @@ export const StoreScreen: React.FC = () => {
         refreshControl={
           <RefreshControl
             refreshing={isLoading}
-            onRefresh={() => {
-              setIsLoading(true)
-              setTimeout(() => setIsLoading(false), 1000)
-            }}
+            onRefresh={loadProducts}
             colors={[COLORS.primary.coral]}
           />
         }
@@ -871,6 +813,18 @@ const styles = StyleSheet.create({
   },
   modalBuyButtonText: {
     ...TYPOGRAPHY.body1,
+    color: COLORS.background.surface,
+    fontWeight: 'bold',
+  },
+  retryButton: {
+    backgroundColor: COLORS.primary.coral,
+    paddingHorizontal: SPACING.md,
+    paddingVertical: SPACING.sm,
+    borderRadius: 8,
+    marginTop: SPACING.md,
+  },
+  retryButtonText: {
+    ...TYPOGRAPHY.body2,
     color: COLORS.background.surface,
     fontWeight: 'bold',
   },

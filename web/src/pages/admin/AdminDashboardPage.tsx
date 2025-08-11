@@ -14,6 +14,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { GlassCard, GlassWidget } from '@/components/ui/GlassContainer'
 import { OiPetLogo } from '@/components/ui/OiPetLogo'
+import { Card, Statistic, Badge, Avatar, List, Progress, Tag } from 'antd'
 
 interface DashboardStats {
   totalUsers: number
@@ -206,7 +207,7 @@ export const AdminDashboardPage: React.FC = () => {
         </div>
       )}
 
-      {/* Stats Cards */}
+      {/* Stats Cards com Ant Design */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -214,67 +215,60 @@ export const AdminDashboardPage: React.FC = () => {
         className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
       >
         <GlassWidget className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Usuários</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalUsers.toLocaleString()}</p>
-              <p className="text-xs text-green-600 flex items-center mt-1">
-                <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-                +12% este mês
-              </p>
-            </div>
-            <div className="p-3 bg-coral-100 rounded-glass">
-              <UsersIcon className="h-6 w-6 text-coral-600" />
-            </div>
-          </div>
+          <Statistic
+            title="Total Usuários"
+            value={stats.totalUsers}
+            prefix={<UsersIcon className="h-5 w-5 mr-2" />}
+            suffix={
+              <Tag color="success" className="ml-2">
+                <ArrowTrendingUpIcon className="h-3 w-3 inline mr-1" />
+                +12%
+              </Tag>
+            }
+            valueStyle={{ color: '#E85A5A' }}
+          />
         </GlassWidget>
 
         <GlassWidget className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Total Pets</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalPets.toLocaleString()}</p>
-              <p className="text-xs text-green-600 flex items-center mt-1">
-                <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-                +18% este mês
-              </p>
-            </div>
-            <div className="p-3 bg-teal-100 rounded-glass">
-              <HeartIcon className="h-6 w-6 text-teal-600" />
-            </div>
-          </div>
+          <Statistic
+            title="Total Pets"
+            value={stats.totalPets}
+            prefix={<HeartIcon className="h-5 w-5 mr-2" />}
+            suffix={
+              <Tag color="success" className="ml-2">
+                <ArrowTrendingUpIcon className="h-3 w-3 inline mr-1" />
+                +18%
+              </Tag>
+            }
+            valueStyle={{ color: '#5AA3A3' }}
+          />
         </GlassWidget>
 
         <GlassWidget className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Registros de Saúde</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.totalHealthRecords.toLocaleString()}</p>
-              <p className="text-xs text-green-600 flex items-center mt-1">
-                <ArrowTrendingUpIcon className="h-3 w-3 mr-1" />
-                +25% este mês
-              </p>
-            </div>
-            <div className="p-3 bg-purple-100 rounded-glass">
-              <ChartBarIcon className="h-6 w-6 text-purple-600" />
-            </div>
-          </div>
+          <Statistic
+            title="Registros de Saúde"
+            value={stats.totalHealthRecords}
+            prefix={<ChartBarIcon className="h-5 w-5 mr-2" />}
+            suffix={
+              <Tag color="success" className="ml-2">
+                <ArrowTrendingUpIcon className="h-3 w-3 inline mr-1" />
+                +25%
+              </Tag>
+            }
+            valueStyle={{ color: '#8B5CF6' }}
+          />
         </GlassWidget>
 
         <GlassWidget className="p-6">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm text-gray-600">Usuários Ativos</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.activeUsers}</p>
-              <p className="text-xs text-green-600 flex items-center mt-1">
-                <EyeIcon className="h-3 w-3 mr-1" />
-                Agora online
-              </p>
-            </div>
-            <div className="p-3 bg-green-100 rounded-glass">
-              <BellIcon className="h-6 w-6 text-green-600" />
-            </div>
-          </div>
+          <Statistic
+            title="Usuários Ativos"
+            value={stats.activeUsers}
+            prefix={<BellIcon className="h-5 w-5 mr-2" />}
+            suffix={
+              <Badge status="success" text="Online" className="ml-2" />
+            }
+            valueStyle={{ color: '#10B981' }}
+          />
         </GlassWidget>
       </motion.div>
 
@@ -316,28 +310,28 @@ export const AdminDashboardPage: React.FC = () => {
             <h3 className="text-lg font-semibold text-gray-900">Atividade Recente</h3>
             <ClockIcon className="h-5 w-5 text-gray-400" />
           </div>
-          <div className="space-y-3">
-            {stats.recentActivity.map((activity) => (
-              <div key={activity.id} className="flex items-start space-x-3">
-                <div className={`p-2 rounded-glass ${getActivityColor(activity.type)}`}>
-                  {getActivityIcon(activity.type)}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">
-                    {activity.description}
-                  </p>
-                  {activity.user && (
-                    <p className="text-xs text-gray-500">
-                      por {activity.user}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-400">
-                    {activity.timestamp}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          <List
+            dataSource={stats.recentActivity}
+            renderItem={(activity) => (
+              <List.Item key={activity.id}>
+                <List.Item.Meta
+                  avatar={
+                    <Avatar 
+                      icon={getActivityIcon(activity.type)}
+                      className={getActivityColor(activity.type)}
+                    />
+                  }
+                  title={activity.description}
+                  description={
+                    <div>
+                      {activity.user && <span>por {activity.user} • </span>}
+                      <span>{activity.timestamp}</span>
+                    </div>
+                  }
+                />
+              </List.Item>
+            )}
+          />
         </GlassCard>
       </motion.div>
 
@@ -358,17 +352,28 @@ export const AdminDashboardPage: React.FC = () => {
               <span className="text-sm text-gray-600">Uptime do Servidor</span>
               <span className="font-bold text-green-600">{stats.serverUptime}</span>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Uso de CPU</span>
-              <span className="font-bold text-blue-600">23%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Uso de Memória</span>
-              <span className="font-bold text-yellow-600">67%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-gray-600">Espaço em Disco</span>
-              <span className="font-bold text-gray-700">45%</span>
+            <div className="space-y-3">
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-600">Uso de CPU</span>
+                  <span className="font-bold text-blue-600">23%</span>
+                </div>
+                <Progress percent={23} strokeColor="#3B82F6" />
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-600">Uso de Memória</span>
+                  <span className="font-bold text-yellow-600">67%</span>
+                </div>
+                <Progress percent={67} strokeColor="#F59E0B" />
+              </div>
+              <div>
+                <div className="flex justify-between items-center mb-1">
+                  <span className="text-sm text-gray-600">Espaço em Disco</span>
+                  <span className="font-bold text-gray-700">45%</span>
+                </div>
+                <Progress percent={45} strokeColor="#6B7280" />
+              </div>
             </div>
           </div>
         </GlassCard>

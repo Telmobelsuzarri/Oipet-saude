@@ -1,3 +1,7 @@
+import axios from 'axios'
+
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001'
+
 interface EcommerceEvent {
   event: string
   timestamp: number
@@ -488,6 +492,77 @@ class EcommerceAnalyticsService {
   }
 
   // Simular dados para demonstração
+  // Backend Integration Methods
+  private getAuthToken(): string | null {
+    return localStorage.getItem('authToken')
+  }
+
+  private getHeaders() {
+    const token = this.getAuthToken()
+    return {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` })
+    }
+  }
+
+  /**
+   * Enviar tracking para o backend
+   */
+  async trackProductViewBackend(productId: string, userId?: string): Promise<void> {
+    try {
+      const params = {
+        productId,
+        userId,
+        sessionId: this.sessionId,
+        referrer: document.referrer || undefined,
+        userAgent: navigator.userAgent
+      }
+
+      await axios.post(
+        `${API_BASE_URL}/api/ecommerce-analytics/track-view`,
+        params,
+        { headers: this.getHeaders() }
+      )
+    } catch (error) {
+      console.error('Erro ao enviar tracking para backend:', error)
+    }
+  }
+
+  /**
+   * Buscar dados de analytics do backend
+   */
+  async getBackendAnalytics(): Promise<any> {
+    try {
+      const response = await axios.get(
+        `${API_BASE_URL}/api/ecommerce-analytics/dashboard`,
+        { headers: this.getHeaders() }
+      )
+      return response.data.data
+    } catch (error) {
+      console.error('Erro ao buscar analytics do backend:', error)
+      return null
+    }
+  }
+
+  /**
+   * Buscar produtos populares do backend
+   */
+  async getBackendPopularProducts(limit = 10): Promise<any[]> {
+    try {
+      const params = new URLSearchParams()
+      params.append('limit', limit.toString())
+
+      const response = await axios.get(
+        `${API_BASE_URL}/api/ecommerce-analytics/popular-products?${params}`,
+        { headers: this.getHeaders() }
+      )
+      return response.data.data || []
+    } catch (error) {
+      console.error('Erro ao buscar produtos populares do backend:', error)
+      return []
+    }
+  }
+
   generateMockData(days: number = 30): void {
     const mockProducts = [
       { id: 'racao-premium-adulto', name: 'Ração Premium Cães Adultos', category: 'ração', price: 89.90 },

@@ -4,7 +4,7 @@
 
 import express from 'express';
 import { asyncHandler } from '@/middleware/errorHandler';
-import { authenticate, requireAdmin } from '@/middleware/auth';
+import { auth as authenticate, requireAdmin } from '@/middleware/auth';
 import { validate, authValidators, queryValidators } from '@/utils/validators';
 import { userService } from '@/services/userService';
 import { logger } from '@/utils/logger';

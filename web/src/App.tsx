@@ -28,18 +28,38 @@ import { AdminEcommerceAnalyticsPage } from '@/pages/admin/AdminEcommerceAnalyti
 // Real Store Page
 import { StorePage } from '@/pages/store/StorePage'
 
-// Real Scanner Page
-import { FoodScannerPage } from '@/pages/scanner/FoodScannerPage'
+// Real Scanner Page (now Food Gallery)
+import { FoodGalleryPage } from '@/pages/gallery/FoodGalleryPageSimple'
 
 // Real Reports Page
 import { ReportsPage } from '@/pages/reports/ReportsPage'
+
+// Real Recommendations Page
+import { RecommendationsPage } from '@/pages/recommendations/RecommendationsPage'
+
+// Real Notifications Page
+import { NotificationsPage } from '@/pages/notifications/NotificationsPage'
+
+// Real Profile Page with Gamification
+import { ProfilePageGamified as ProfilePage } from '@/pages/profile/ProfilePageGamified'
+
+// Export Demo Page
+import { ExportDemoPage } from '@/pages/reports/ExportDemoPage'
+import { TestExportPage } from '@/pages/reports/TestExportPage'
+import { SimpleExportTest } from '@/pages/reports/SimpleExportTest'
+import { QuickExportTest } from '@/pages/reports/QuickExportTest'
+
+// Veterinarians Pages
+import { VeterinariansPage } from '@/pages/veterinarians/VeterinariansPage'
+import { VeterinarianDetailPage } from '@/pages/veterinarians/VeterinarianDetailPage'
+
+// Challenges Pages
+import { WeeklyChallengesPage } from '@/pages/challenges/WeeklyChallengesPage'
 
 // Quality Placeholders
 import { 
   ForgotPasswordPage,
   PetDetailPage,
-  NotificationsPage,
-  ProfilePage,
   SettingsPage,
   AboutPage,
   ContactPage,
@@ -101,12 +121,21 @@ function App() {
           <Route path="pets/:id" element={<PetDetailPage />} />
           <Route path="health" element={<HealthPage />} />
           <Route path="health/tracking" element={<HealthTrackingPage />} />
-          <Route path="scanner" element={<FoodScannerPage />} />
+          <Route path="scanner" element={<FoodGalleryPage />} />
+          <Route path="gallery" element={<FoodGalleryPage />} />
           <Route path="store" element={<StorePage />} />
           <Route path="reports" element={<ReportsPage />} />
+          <Route path="reports/export-demo" element={<ExportDemoPage />} />
+          <Route path="reports/test-export" element={<TestExportPage />} />
+          <Route path="reports/simple-test" element={<SimpleExportTest />} />
+          <Route path="reports/quick-test" element={<QuickExportTest />} />
+          <Route path="recommendations" element={<RecommendationsPage />} />
           <Route path="notifications" element={<NotificationsPage />} />
           <Route path="profile" element={<ProfilePage />} />
           <Route path="settings" element={<SettingsPage />} />
+          <Route path="veterinarians" element={<VeterinariansPage />} />
+          <Route path="veterinarians/:id" element={<VeterinarianDetailPage />} />
+          <Route path="challenges" element={<WeeklyChallengesPage />} />
 
           {/* Admin Routes */}
           {user?.isAdmin && (

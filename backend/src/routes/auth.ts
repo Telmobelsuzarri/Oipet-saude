@@ -5,7 +5,7 @@
 import express from 'express';
 import { asyncHandler } from '@/middleware/errorHandler';
 import { authService } from '@/services/authService';
-import { authenticate } from '@/middleware/auth';
+import { auth as authenticate } from '@/middleware/auth';
 import { validate, authValidators } from '@/utils/validators';
 import { logger } from '@/utils/logger';
 

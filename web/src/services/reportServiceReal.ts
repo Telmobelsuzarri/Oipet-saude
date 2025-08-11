@@ -1,8 +1,9 @@
 // Report Service Real - Geração de relatórios funcionais com dados reais
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek, startOfYear, endOfYear, subDays, subMonths } from 'date-fns'
 import { ptBR } from 'date-fns/locale'
-import { healthTrackingService, type DailyHealthRecord, type HealthTrend } from './healthTrackingService'
+import { healthTrackingService, type DailyHealthRecord, type HealthTrend, type HealthReport } from './healthTrackingService'
 import { usePetStore } from '@/stores/petStore'
+import { exportService } from './exportService'
 
 export interface ReportFilter {
   petIds?: string[]
@@ -659,31 +660,82 @@ class ReportServiceReal {
   async exportReport(reportData: ReportData, options: ExportOptions): Promise<{ url: string; filename: string }> {
     const filename = this.generateFilename(reportData.metadata.title, options.format)
     
-    let content = ''
-    
-    switch (options.format) {
-      case 'json':
-        content = JSON.stringify(reportData, null, 2)
-        break
-      case 'csv':
-        content = this.generateCSV(reportData)
-        break
-      case 'pdf':
-      case 'excel':
-        // Para PDF/Excel, retornar mock URL por enquanto (M8.3)
-        return {
-          url: '#',
-          filename: filename
-        }
+    // Converter ReportData para HealthReport para o serviço de exportação
+    const healthReport: HealthReport = {
+      id: `report_${Date.now()}`,
+      petId: reportData.metadata.petCount === 1 ? reportData.sections[0]?.data?.petId || '' : '',
+      startDate: reportData.metadata.dateRange?.start || new Date().toISOString(),
+      endDate: reportData.metadata.dateRange?.end || new Date().toISOString(),
+      createdAt: new Date(),
+      data: this.extractHealthRecordsFromSections(reportData.sections),
+      summary: {
+        statistics: reportData.summary.metrics ? {
+          totalRecords: reportData.summary.metrics.totalRecords,
+          daysWithData: reportData.summary.metrics.daysWithData || 0,
+          totalDays: reportData.summary.metrics.totalDays || 30,
+          weight: {
+            average: reportData.summary.metrics.averageWeight || 0,
+            min: reportData.summary.metrics.minWeight || 0,
+            max: reportData.summary.metrics.maxWeight || 0
+          },
+          water: {
+            average: reportData.summary.metrics.averageWater || 0,
+            min: 0,
+            max: 0,
+            total: 0
+          },
+          activity: {
+            averageSteps: reportData.summary.metrics.averageActivity || 0,
+            totalSteps: reportData.summary.metrics.totalActivity || 0,
+            averageMinutes: 0,
+            minSteps: 0,
+            maxSteps: 0,
+            minMinutes: 0,
+            maxMinutes: 0
+          },
+          sleep: {
+            average: 0,
+            min: 0,
+            max: 0
+          }
+        } : undefined,
+        charts: this.extractChartsFromSections(reportData.sections),
+        insights: reportData.summary.recommendations
+      }
     }
     
-    // Para JSON e CSV, criar blob e URL
-    const blob = new Blob([content], { 
-      type: options.format === 'json' ? 'application/json' : 'text/csv' 
-    })
-    const url = URL.createObjectURL(blob)
+    // Obter o pet do store
+    const petStore = usePetStore.getState()
+    const pet = petStore.pets[0] // Usar o primeiro pet como padrão
     
-    return { url, filename }
+    if (!pet) {
+      throw new Error('Nenhum pet encontrado para gerar o relatório')
+    }
+    
+    switch (options.format) {
+      case 'pdf':
+        await exportService.exportHealthReportPDF(healthReport, pet, {
+          includeCharts: options.includeCharts,
+          includeRecommendations: true,
+          template: 'professional'
+        })
+        return { url: '#', filename }
+        
+      case 'excel':
+        await exportService.exportHealthReportExcel(healthReport, pet, {
+          includeRecommendations: true
+        })
+        return { url: '#', filename }
+        
+      case 'csv':
+        const content = this.generateCSV(reportData)
+        const blob = new Blob([content], { type: 'text/csv' })
+        const url = URL.createObjectURL(blob)
+        return { url, filename }
+        
+      default:
+        throw new Error('Formato de exportação não suportado')
+    }
   }
 
   private generateCSV(reportData: ReportData): string {
@@ -712,6 +764,59 @@ class ReportServiceReal {
     const date = new Date().toISOString().split('T')[0]
     const sanitizedTitle = title.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')
     return `${sanitizedTitle}-${date}.${format}`
+  }
+
+  // Métodos auxiliares para conversão de dados
+  private extractHealthRecordsFromSections(sections: ReportSection[]): DailyHealthRecord[] {
+    const records: DailyHealthRecord[] = []
+    
+    sections.forEach(section => {
+      if (section.type === 'chart' && section.data?.datasets) {
+        // Extrair dados dos gráficos se necessário
+        // Por enquanto, retornar array vazio pois os dados já foram processados
+      }
+    })
+    
+    return records
+  }
+
+  private extractChartsFromSections(sections: ReportSection[]): any {
+    const charts: any = {}
+    
+    sections.forEach(section => {
+      if (section.type === 'chart' && section.data) {
+        if (section.id === 'weight-trend') {
+          charts.weight = this.convertChartDataToTimeSeries(section.data)
+        } else if (section.id === 'activity-trend') {
+          charts.activity = this.convertChartDataToActivitySeries(section.data)
+        }
+      }
+    })
+    
+    return charts
+  }
+
+  private convertChartDataToTimeSeries(chartData: ChartData): any[] {
+    if (!chartData.datasets || chartData.datasets.length === 0) return []
+    
+    const dataset = chartData.datasets[0]
+    return chartData.labels.map((label, index) => ({
+      date: label,
+      value: dataset.data[index] || 0
+    }))
+  }
+
+  private convertChartDataToActivitySeries(chartData: ChartData): any[] {
+    if (!chartData.datasets || chartData.datasets.length === 0) return []
+    
+    const stepsDataset = chartData.datasets.find(d => d.label?.includes('Passos')) || chartData.datasets[0]
+    const minutesDataset = chartData.datasets.find(d => d.label?.includes('Minutos')) || chartData.datasets[1]
+    
+    return chartData.labels.map((label, index) => ({
+      date: label,
+      steps: stepsDataset?.data[index] || 0,
+      minutes: minutesDataset?.data[index] || 0
+    }))
   }
 }
 

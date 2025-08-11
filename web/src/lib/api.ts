@@ -194,6 +194,30 @@ export const api = {
       apiClient.post('/api/auth/verify-email', { token }),
   },
 
+  // Products endpoints
+  products: {
+    getProducts: (filters?: any) =>
+      apiClient.get('/api/products', { params: filters }),
+    
+    getProduct: (id: string) =>
+      apiClient.get(`/api/products/${id}`),
+    
+    getCategories: () =>
+      apiClient.get('/api/products/categories'),
+    
+    getBrands: () =>
+      apiClient.get('/api/products/brands'),
+    
+    searchProducts: (query: string, filters?: any) =>
+      apiClient.post('/api/products/search', { query, filters }),
+    
+    getRecommendations: (petId: string, limit?: number) =>
+      apiClient.post('/api/products/recommendations', { petId, limit }),
+    
+    trackView: (productId: string, userId?: string) =>
+      apiClient.post('/api/products/track-view', { productId, userId }),
+  },
+
   // User endpoints
   users: {
     getProfile: () =>

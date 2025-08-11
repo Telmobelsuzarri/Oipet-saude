@@ -15,19 +15,18 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
 import { GlassContainer, GlassCard, GlassWidget } from '@/components/ui/GlassContainer'
 import { ProductCard } from '@/components/store/ProductCard'
 import { OiPetWebView } from '@/components/store/OiPetWebView'
-import { ecommerceService, type Product, type ProductFilter } from '@/services/ecommerceService'
+import { ecommerceService, type Product, type ProductFilter } from '@/services/ecommerce'
 import { ecommerceAnalytics } from '@/services/ecommerceAnalytics'
 import { cn } from '@/lib/utils'
 import { OiPetLogo } from '@/components/ui/OiPetLogo'
 
 const categories = [
   { id: 'all', name: 'Todos', icon: '🏪' },
-  { id: 'ração', name: 'Ração', icon: '🥘' },
+  { id: 'para-cachorros', name: 'Cães', icon: '🐕' },
+  { id: 'para-gatos', name: 'Gatos', icon: '🐱' },
   { id: 'petiscos', name: 'Petiscos', icon: '🦴' },
   { id: 'brinquedos', name: 'Brinquedos', icon: '🎾' },
-  { id: 'acessórios', name: 'Acessórios', icon: '🎒' },
-  { id: 'higiene', name: 'Higiene', icon: '🧴' },
-  { id: 'saúde', name: 'Saúde', icon: '💊' }
+  { id: 'acessorios', name: 'Acessórios', icon: '🎒' }
 ]
 
 const petTypes = [

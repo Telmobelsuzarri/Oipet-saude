@@ -12,7 +12,11 @@ import {
   PlusIcon,
   CameraIcon,
   ShoppingCartIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  SparklesIcon,
+  BuildingOfficeIcon,
+  CalendarIcon,
+  TrophyIcon
 } from '@heroicons/react/24/outline'
 
 import { GlassSidebar } from '@/components/ui/GlassContainer'
@@ -30,9 +34,12 @@ export const AppLayout: React.FC = () => {
     { name: 'Dashboard', href: '/app/dashboard', icon: HomeIcon },
     { name: 'Meus Pets', href: '/app/pets', icon: HeartIcon },
     { name: 'Saúde', href: '/app/health', icon: ChartBarIcon },
-    { name: 'Scanner', href: '/app/scanner', icon: CameraIcon },
+    { name: 'Desafios', href: '/app/challenges', icon: TrophyIcon },
+    { name: 'Veterinários', href: '/app/veterinarians', icon: BuildingOfficeIcon },
+    { name: 'Galeria de Alimentos', href: '/app/gallery', icon: CameraIcon },
     { name: 'Produtos OiPet', href: '/app/store', icon: ShoppingCartIcon },
     { name: 'Relatórios', href: '/app/reports', icon: DocumentTextIcon },
+    { name: 'Recomendações IA', href: '/app/recommendations', icon: SparklesIcon },
     { name: 'Notificações', href: '/app/notifications', icon: BellIcon },
     { name: 'Perfil', href: '/app/profile', icon: UserIcon },
     { name: 'Configurações', href: '/app/settings', icon: Cog6ToothIcon },

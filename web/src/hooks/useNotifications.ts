@@ -1,119 +1,47 @@
-import { useCallback } from 'react'
-import { useNotificationStore, Notification } from '@/stores/notificationStore'
+import { useState, useEffect } from 'react'
+import { notificationService, Notification } from '@/services/notificationService'
 
 export const useNotifications = () => {
-  const store = useNotificationStore()
+  const [notifications, setNotifications] = useState<Notification[]>([])
+  const [unreadCount, setUnreadCount] = useState(0)
 
-  const showNotification = useCallback((
-    type: Notification['type'],
-    title: string,
-    message: string,
-    options?: {
-      priority?: Notification['priority']
-      petId?: string
-      petName?: string
-      actionUrl?: string
-      scheduledFor?: Date
-    }
-  ) => {
-    store.addNotification({
-      type,
-      title,
-      message,
-      priority: options?.priority || 'medium',
-      petId: options?.petId,
-      petName: options?.petName,
-      actionUrl: options?.actionUrl,
-      scheduledFor: options?.scheduledFor
+  useEffect(() => {
+    // Load initial notifications
+    const allNotifications = notificationService.getNotifications()
+    setNotifications(allNotifications)
+    setUnreadCount(allNotifications.filter(n => !n.read).length)
+
+    // Subscribe to changes
+    const unsubscribe = notificationService.subscribe((updatedNotifications) => {
+      setNotifications(updatedNotifications)
+      setUnreadCount(updatedNotifications.filter(n => !n.read).length)
     })
-  }, [store])
 
-  const showSuccess = useCallback((title: string, message: string, options?: { actionUrl?: string }) => {
-    showNotification('system', title, message, { ...options, priority: 'low' })
-  }, [showNotification])
+    return unsubscribe
+  }, [])
 
-  const showError = useCallback((title: string, message: string, options?: { actionUrl?: string }) => {
-    showNotification('system', title, message, { ...options, priority: 'high' })
-  }, [showNotification])
+  const markAsRead = (notificationId: string) => {
+    notificationService.markAsRead(notificationId)
+  }
 
-  const showReminder = useCallback((
-    title: string, 
-    message: string, 
-    petName: string, 
-    options?: { 
-      petId?: string
-      scheduledFor?: Date 
-      actionUrl?: string 
-    }
-  ) => {
-    showNotification('reminder', title, message, {
-      ...options,
-      petName,
-      priority: 'high'
-    })
-  }, [showNotification])
+  const markAllAsRead = () => {
+    notificationService.markAllAsRead()
+  }
 
-  const showHealthAlert = useCallback((
-    title: string, 
-    message: string, 
-    petName: string, 
-    options?: { 
-      petId?: string
-      actionUrl?: string 
-    }
-  ) => {
-    showNotification('health', title, message, {
-      ...options,
-      petName,
-      priority: 'medium'
-    })
-  }, [showNotification])
+  const deleteNotification = (notificationId: string) => {
+    notificationService.deleteNotification(notificationId)
+  }
 
-  const showAppointmentReminder = useCallback((
-    title: string, 
-    message: string, 
-    petName: string, 
-    scheduledFor: Date,
-    options?: { 
-      petId?: string
-      actionUrl?: string 
-    }
-  ) => {
-    showNotification('appointment', title, message, {
-      ...options,
-      petName,
-      scheduledFor,
-      priority: 'high'
-    })
-  }, [showNotification])
-
-  const showAchievement = useCallback((
-    title: string, 
-    message: string, 
-    petName: string, 
-    options?: { 
-      petId?: string
-      actionUrl?: string 
-    }
-  ) => {
-    showNotification('achievement', title, message, {
-      ...options,
-      petName,
-      priority: 'low'
-    })
-  }, [showNotification])
+  const clearAll = () => {
+    notificationService.clearAllNotifications()
+  }
 
   return {
-    // Store methods
-    ...store,
-    
-    // Helper methods
-    showNotification,
-    showSuccess,
-    showError,
-    showReminder,
-    showHealthAlert,
-    showAppointmentReminder,
-    showAchievement
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    deleteNotification,
+    clearAll
   }
 }

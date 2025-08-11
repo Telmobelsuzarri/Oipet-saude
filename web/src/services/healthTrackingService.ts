@@ -1,5 +1,6 @@
 // Health Tracking Service - Sistema de coleta e análise de dados de saúde
 import { usePetStore } from '@/stores/petStore'
+import { gamificationService } from './gamificationService'
 
 // Interfaces para dados de saúde
 export interface HealthMetric {
@@ -124,6 +125,18 @@ class HealthTrackingService {
 
     this.saveToStorage()
     this.analyzeAndGenerateAlerts(newRecord)
+    
+    // Integração com gamificação - dar XP por registrar dados de saúde
+    if (typeof window !== 'undefined' && record.weight) {
+      try {
+        gamificationService.checkAchievements(record.petId, { 
+          type: 'weight_record', 
+          data: { weight: record.weight } 
+        })
+      } catch (error) {
+        console.log('Gamification integration error:', error)
+      }
+    }
     
     return newRecord
   }

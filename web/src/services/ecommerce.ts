@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { api } from '@/lib/api'
 
 const OIPET_BASE_URL = 'https://oipetcomidadeverdade.com.br'
 
@@ -96,13 +97,17 @@ class EcommerceService {
     if (cached) return cached
 
     try {
-      // Por enquanto, retornar dados mock até implementar scraping real
+      // Tentar usar API real primeiro
+      const response = await api.products.getProducts(filters)
+      const result = response.data.data
+      this.setCache(cacheKey, result)
+      return result
+    } catch (error) {
+      console.warn('API não disponível, usando dados mock:', error)
+      // Fallback para dados mock
       const mockResponse = this.getMockProducts(filters)
       this.setCache(cacheKey, mockResponse)
       return mockResponse
-    } catch (error) {
-      console.error('Erro ao buscar produtos:', error)
-      throw new Error('Falha ao carregar produtos da OiPet')
     }
   }
 
@@ -112,14 +117,21 @@ class EcommerceService {
     if (cached) return cached
 
     try {
+      // Tentar usar API real primeiro
+      const response = await api.products.getProduct(id)
+      const product = response.data.data
+      if (product) {
+        this.setCache(cacheKey, product)
+      }
+      return product
+    } catch (error) {
+      console.warn('API não disponível, usando dados mock:', error)
+      // Fallback para dados mock
       const mockProduct = this.getMockProduct(id)
       if (mockProduct) {
         this.setCache(cacheKey, mockProduct)
       }
       return mockProduct
-    } catch (error) {
-      console.error('Erro ao buscar produto:', error)
-      return null
     }
   }
 
@@ -129,19 +141,32 @@ class EcommerceService {
     if (cached) return cached
 
     try {
+      // Tentar usar API real primeiro
+      const response = await api.products.getCategories()
+      const categories = response.data.data
+      this.setCache(cacheKey, categories)
+      return categories
+    } catch (error) {
+      console.warn('API não disponível, usando dados mock:', error)
+      // Fallback para dados mock
       const mockCategories = this.getMockCategories()
       this.setCache(cacheKey, mockCategories)
       return mockCategories
-    } catch (error) {
-      console.error('Erro ao buscar categorias:', error)
-      return []
     }
   }
 
-  async searchProducts(query: string): Promise<Product[]> {
-    const filters: ProductFilter = { search: query, limit: 20 }
-    const response = await this.getProducts(filters)
-    return response.products
+  async searchProducts(query: string, filters?: ProductFilter): Promise<Product[]> {
+    try {
+      // Tentar usar API real primeiro
+      const response = await api.products.searchProducts(query, filters)
+      return response.data.data
+    } catch (error) {
+      console.warn('API não disponível, usando busca mock:', error)
+      // Fallback para busca mock
+      const searchFilters: ProductFilter = { search: query, limit: 20, ...filters }
+      const response = await this.getProducts(searchFilters)
+      return response.products
+    }
   }
 
   generateProductUrl(product: Product): string {

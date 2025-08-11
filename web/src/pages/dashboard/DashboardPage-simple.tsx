@@ -11,6 +11,10 @@ import { WeeklyBarChart } from '@/components/charts/WeeklyBarChart'
 import { ActivityTimeline, createMockActivities } from '@/components/charts/ActivityTimeline'
 import { FloatingActionButton, createOiPetActions } from '@/components/ui/FloatingActionButton'
 import { OiPetLogo } from '@/components/ui/OiPetLogo'
+import { SmartRecommendationWidget } from '@/components/recommendations/SmartRecommendationWidget'
+import { FoodPhotoWidget } from '@/components/gallery/FoodPhotoWidget'
+import { UpcomingAppointmentsWidget } from '@/components/appointments/UpcomingAppointmentsWidget'
+import { ChallengesWidget } from '@/components/dashboard/ChallengesWidget'
 
 export const DashboardPage: React.FC = () => {
   const { user } = useAuthStore()
@@ -484,11 +488,51 @@ export const DashboardPage: React.FC = () => {
               </div>
             </motion.div>
 
-            {/* Activity Timeline */}
+            {/* Challenges Widget */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.45 }}
+            >
+              <ChallengesWidget />
+            </motion.div>
+
+            {/* AI Recommendations Widget */}
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.5 }}
+            >
+              <SmartRecommendationWidget 
+                petId={activePet?._id}
+              />
+            </motion.div>
+
+            {/* Upcoming Appointments Widget */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.55 }}
+            >
+              <UpcomingAppointmentsWidget />
+            </motion.div>
+
+            {/* Food Gallery Widget */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.6 }}
+            >
+              <FoodPhotoWidget 
+                petId={activePet?._id}
+              />
+            </motion.div>
+
+            {/* Activity Timeline */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.7 }}
             >
               <ActivityTimeline
                 activities={recentActivities}
@@ -501,7 +545,7 @@ export const DashboardPage: React.FC = () => {
             <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 0.6 }}
+              transition={{ delay: 0.8 }}
               className="bg-white/30 backdrop-blur-md border border-white/20 rounded-2xl p-6"
             >
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Resumo</h3>

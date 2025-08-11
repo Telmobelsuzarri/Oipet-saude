@@ -17,10 +17,15 @@ import {
 import { GlassContainer, GlassCard, GlassWidget } from '@/components/ui/GlassContainer'
 import { usePetStore } from '@/stores/petStore'
 import { healthTrackingService, type DailyHealthRecord, type HealthAlert } from '@/services/healthTrackingService'
+import { gamificationService } from '@/services/gamificationService'
+import { challengeService } from '@/services/challengeService'
+import { RequirementType } from '@/types/challenges'
+import { useAuthStore } from '@/stores/authStore'
 import { cn } from '@/lib/utils'
 
 export const HealthTrackingPage: React.FC = () => {
   const { pets, selectedPet, setSelectedPet } = usePetStore()
+  const { user } = useAuthStore()
   const [currentRecord, setCurrentRecord] = useState<Partial<DailyHealthRecord> | null>(null)
   const [healthAlerts, setHealthAlerts] = useState<HealthAlert[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -88,6 +93,45 @@ export const HealthTrackingPage: React.FC = () => {
         medications: currentRecord.medications || [],
         notes: currentRecord.notes || ''
       })
+
+      // Integração com gamificação - dar XP por registrar dados de saúde
+      if (user && currentRecord.weight) {
+        try {
+          await gamificationService.checkAchievements(user.id, {
+            type: 'weight_record',
+            data: { weight: currentRecord.weight }
+          })
+        } catch (error) {
+          console.log('Gamification integration error:', error)
+        }
+      }
+
+      // Integração com desafios semanais - atualizar progresso
+      if (user) {
+        try {
+          // Registrar peso para desafios de saúde
+          if (currentRecord.weight) {
+            await challengeService.updateProgress(
+              user.id,
+              'health-hero-week',
+              RequirementType.WEIGHT_RECORDS,
+              1
+            )
+          }
+
+          // Registrar minutos de exercício para desafios de atividade física
+          if (currentRecord.activity?.exerciseMinutes) {
+            await challengeService.updateProgress(
+              user.id,
+              'active-week',
+              RequirementType.EXERCISE_MINUTES,
+              currentRecord.activity.exerciseMinutes
+            )
+          }
+        } catch (error) {
+          console.log('Challenge progress update error:', error)
+        }
+      }
 
       setShowSuccess(true)
       setTimeout(() => setShowSuccess(false), 3000)

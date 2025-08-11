@@ -217,9 +217,48 @@ const mockChallenges: Challenge[] = [
 
 class GamificationService {
   private readonly API_DELAY = 800
+  private readonly STORAGE_KEY = 'oipet_gamification_profile'
+
+  // Get real user data from localStorage
+  private getUserData(userId: string): any {
+    const data = localStorage.getItem(`${this.STORAGE_KEY}_${userId}`)
+    if (!data) {
+      // Initialize new user
+      const initialData = {
+        totalPoints: 0,
+        totalXP: 0,
+        level: { currentLevel: 1, currentXP: 0, xpToNextLevel: 200, totalXP: 0, title: 'Pet Iniciante' },
+        unlockedAchievements: [],
+        completedChallenges: [],
+        stats: {
+          totalActivities: 0,
+          totalWeighIns: 0,
+          totalHealthRecords: 0,
+          totalFoodScans: 0,
+          daysActive: 1,
+          consecutiveDays: 1
+        },
+        streaks: [
+          { type: 'daily_check', current: 1, best: 1, lastUpdate: new Date().toISOString() },
+          { type: 'weekly_weigh', current: 0, best: 0, lastUpdate: new Date().toISOString() },
+          { type: 'activity_log', current: 0, best: 0, lastUpdate: new Date().toISOString() }
+        ],
+        lastLoginDate: new Date().toISOString()
+      }
+      this.saveUserData(userId, initialData)
+      return initialData
+    }
+    return JSON.parse(data)
+  }
+
+  private saveUserData(userId: string, data: any): void {
+    localStorage.setItem(`${this.STORAGE_KEY}_${userId}`, JSON.stringify(data))
+  }
 
   async getUserGameProfile(userId: string): Promise<UserGameProfile> {
     await new Promise(resolve => setTimeout(resolve, this.API_DELAY))
+    
+    const userData = this.getUserData(userId)
 
     // Mock user profile
     const mockProfile: UserGameProfile = {
@@ -341,21 +380,156 @@ class GamificationService {
   }): Promise<Achievement[]> {
     await new Promise(resolve => setTimeout(resolve, this.API_DELAY))
     
-    // Mock achievement checking logic
+    const userData = this.getUserData(userId)
     const newAchievements: Achievement[] = []
     
-    // Simulate chance of unlocking achievement
-    if (Math.random() > 0.8) {
-      const unlockedAchievement = mockAchievements.find(a => a.id === 'weight_warrior')
-      if (unlockedAchievement) {
-        newAchievements.push({
-          ...unlockedAchievement,
-          unlockedAt: new Date().toISOString()
-        })
-      }
+    // Update stats based on action
+    switch (action.type) {
+      case 'weight_record':
+        userData.stats.totalWeighIns++
+        userData.stats.totalHealthRecords++
+        
+        // Check weight-related achievements
+        if (userData.stats.totalWeighIns === 10 && !userData.unlockedAchievements.includes('weight_warrior')) {
+          const achievement = mockAchievements.find(a => a.id === 'weight_warrior')
+          if (achievement) {
+            newAchievements.push({ ...achievement, unlockedAt: new Date().toISOString() })
+            userData.unlockedAchievements.push('weight_warrior')
+            userData.totalPoints += achievement.points
+          }
+        }
+        break
+        
+      case 'food_scan':
+        userData.stats.totalFoodScans++
+        
+        // Check food scanning achievements
+        if (userData.stats.totalFoodScans === 25 && !userData.unlockedAchievements.includes('food_scanner_pro')) {
+          const achievement = mockAchievements.find(a => a.id === 'food_scanner_pro')
+          if (achievement) {
+            newAchievements.push({ ...achievement, unlockedAt: new Date().toISOString() })
+            userData.unlockedAchievements.push('food_scanner_pro')
+            userData.totalPoints += achievement.points
+          }
+        }
+        break
+        
+      case 'pet_register':
+        // Check first pet achievement
+        if (!userData.unlockedAchievements.includes('first_pet')) {
+          const achievement = mockAchievements.find(a => a.id === 'first_pet')
+          if (achievement) {
+            newAchievements.push({ ...achievement, unlockedAt: new Date().toISOString() })
+            userData.unlockedAchievements.push('first_pet')
+            userData.totalPoints += achievement.points
+          }
+        }
+        break
+        
+      case 'activity_complete':
+        userData.stats.totalActivities++
+        
+        // Check activity achievements
+        if (userData.stats.totalActivities === 50 && !userData.unlockedAchievements.includes('activity_enthusiast')) {
+          const achievement = mockAchievements.find(a => a.id === 'activity_enthusiast')
+          if (achievement) {
+            newAchievements.push({ ...achievement, unlockedAt: new Date().toISOString() })
+            userData.unlockedAchievements.push('activity_enthusiast')
+            userData.totalPoints += achievement.points
+          }
+        }
+        break
     }
+    
+    // Award XP for actions
+    const xpRewards: Record<string, number> = {
+      weight_record: 30,
+      activity_complete: 25,
+      food_scan: 40,
+      daily_checkin: 20,
+      pet_register: 100
+    }
+    
+    const xpGained = xpRewards[action.type] || 10
+    userData.totalXP += xpGained
+    userData.level.totalXP += xpGained
+    
+    // Update level
+    const newLevel = this.calculateLevel(userData.level.totalXP)
+    if (newLevel.currentLevel > userData.level.currentLevel) {
+      userData.level = newLevel
+      
+      // Create level up notification
+      this.createLevelUpNotification(newLevel.currentLevel)
+    } else {
+      userData.level = newLevel
+    }
+    
+    // Save updated data
+    this.saveUserData(userId, userData)
+    
+    // Create achievement notifications
+    newAchievements.forEach(achievement => {
+      this.createAchievementNotification(achievement)
+    })
 
     return newAchievements
+  }
+  
+  private calculateLevel(totalXP: number): LevelSystem {
+    let level = 1
+    let xpForCurrentLevel = totalXP
+    let xpRequiredForNext = 200
+    
+    // Calculate level based on XP (each level requires more XP)
+    while (xpForCurrentLevel >= xpRequiredForNext && level < 50) {
+      xpForCurrentLevel -= xpRequiredForNext
+      level++
+      xpRequiredForNext = level * 200 + Math.floor(level / 5) * 100
+    }
+    
+    return {
+      currentLevel: level,
+      currentXP: xpForCurrentLevel,
+      xpToNextLevel: xpRequiredForNext - xpForCurrentLevel,
+      totalXP,
+      title: this.getLevelTitle(level),
+      benefits: []
+    }
+  }
+  
+  private createAchievementNotification(achievement: Achievement): void {
+    const notification = {
+      id: `achievement_${achievement.id}_${Date.now()}`,
+      type: 'achievement',
+      title: '🏆 Nova Conquista Desbloqueada!',
+      message: `${achievement.title}: ${achievement.description}`,
+      timestamp: new Date(),
+      read: false,
+      priority: 'high',
+      actionUrl: '/app/profile'
+    }
+    
+    const notifications = JSON.parse(localStorage.getItem('oipet_notifications') || '[]')
+    notifications.unshift(notification)
+    localStorage.setItem('oipet_notifications', JSON.stringify(notifications.slice(0, 50)))
+  }
+  
+  private createLevelUpNotification(level: number): void {
+    const notification = {
+      id: `level_up_${level}_${Date.now()}`,
+      type: 'achievement',
+      title: '🎉 Subiu de Nível!',
+      message: `Parabéns! Você alcançou o nível ${level}: ${this.getLevelTitle(level)}`,
+      timestamp: new Date(),
+      read: false,
+      priority: 'high',
+      actionUrl: '/app/profile'
+    }
+    
+    const notifications = JSON.parse(localStorage.getItem('oipet_notifications') || '[]')
+    notifications.unshift(notification)
+    localStorage.setItem('oipet_notifications', JSON.stringify(notifications.slice(0, 50)))
   }
 
   async updateStreak(userId: string, streakType: Streak['type']): Promise<Streak> {

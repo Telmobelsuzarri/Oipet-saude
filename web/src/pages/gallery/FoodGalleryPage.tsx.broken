@@ -1,0 +1,1205 @@
+import React, { useState, useEffect, useRef } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import {
+  CameraIcon,
+  PhotoIcon,
+  PlusIcon,
+  FunnelIcon,
+  MagnifyingGlassIcon,
+  HeartIcon,
+  ClockIcon,
+  TagIcon,
+  ChartBarIcon,
+  TrashIcon,
+  PencilIcon,
+  ShareIcon,
+  CalendarIcon,
+  ArrowUpTrayIcon
+} from '@heroicons/react/24/outline'
+import {
+  CameraIcon as CameraSolid,
+  HeartIcon as HeartSolid
+} from '@heroicons/react/24/solid'
+
+import { GlassContainer, GlassCard, GlassWidget } from '@/components/ui/GlassContainer'
+import { usePetStore } from '@/stores/petStore'
+import { 
+  foodGalleryService, 
+  type FoodPhoto, 
+  type FoodGalleryStats 
+} from '@/services/foodGalleryService'
+import { cn } from '@/lib/utils'
+
+type FilterType = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'food'
+type ViewMode = 'grid' | 'list'
+
+export const FoodGalleryPage: React.FC = () => {
+  console.log('FoodGalleryPage rendering...')
+  const [selectedPetId, setSelectedPetId] = useState<string>('')
+  const [photos, setPhotos] = useState<FoodPhoto[]>([])
+  const [stats, setStats] = useState<FoodGalleryStats | null>(null)
+  const [filter, setFilter] = useState<FilterType>('all')
+  const [viewMode, setViewMode] = useState<ViewMode>('grid')
+  const [searchTerm, setSearchTerm] = useState('')
+  const [showCamera, setShowCamera] = useState(false)
+  const [selectedPhoto, setSelectedPhoto] = useState<FoodPhoto | null>(null)
+  const [isLoading, setIsLoading] = useState(false)
+  const [cameraLoading, setCameraLoading] = useState(false)
+  const [showPhotoModal, setShowPhotoModal] = useState(false)
+  const [photoForm, setPhotoForm] = useState({
+    mealType: 'snack' as FoodPhoto['mealType'],
+    caption: '',
+    notes: '',
+    tags: '',
+    hasStock: false,
+    stockInfo: {
+      quantity: '',
+      unit: 'pacotes',
+      minimumAlert: ''
+    }
+  })
+  const [currentImageBlob, setCurrentImageBlob] = useState<Blob | null>(null)
+  
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraRef = useRef<HTMLVideoElement>(null)
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null)
+
+  const { pets } = usePetStore()
+
+  useEffect(() => {
+    if (pets.length > 0 && !selectedPetId) {
+      setSelectedPetId(pets[0]._id)
+    }
+  }, [pets, selectedPetId])
+
+  useEffect(() => {
+    if (selectedPetId) {
+      loadPhotos()
+      loadStats()
+    }
+  }, [selectedPetId])
+
+  // Garantir que o vídeo inicie quando a câmera for aberta
+  useEffect(() => {
+    if (showCamera && cameraStream && cameraRef.current) {
+      cameraRef.current.srcObject = cameraStream
+      cameraRef.current.play().catch(e => {
+        console.error('Erro ao reproduzir vídeo:', e)
+      })
+    }
+  }, [showCamera, cameraStream])
+
+  const loadPhotos = () => {
+    if (!selectedPetId) return
+    
+    const petPhotos = foodGalleryService.getPhotosByPet(selectedPetId)
+    setPhotos(petPhotos)
+  }
+
+  const loadStats = () => {
+    if (!selectedPetId) return
+    
+    const petStats = foodGalleryService.getGalleryStats(selectedPetId)
+    setStats(petStats)
+  }
+
+  const filteredPhotos = photos.filter(photo => {
+    const matchesFilter = filter === 'all' || photo.mealType === filter
+    const matchesSearch = !searchTerm || 
+      photo.caption?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      photo.notes?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      photo.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+    
+    return matchesFilter && matchesSearch
+  })
+
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (!file || !selectedPetId) return
+
+    setCurrentImageBlob(file)
+    setPhotoForm({
+      mealType: 'snack',
+      caption: `Alimento registrado em ${new Date().toLocaleString('pt-BR')}`,
+      notes: '',
+      tags: 'novo',
+      hasStock: false,
+      stockInfo: {
+        quantity: '',
+        unit: 'pacotes',
+        minimumAlert: ''
+      }
+    })
+    setShowPhotoModal(true)
+  }
+
+  const startCamera = async () => {
+    setCameraLoading(true)
+    
+    try {
+      console.log('Solicitando acesso à câmera...')
+      
+      const stream = await navigator.mediaDevices.getUserMedia({ 
+        video: { 
+          facingMode: 'environment',
+          width: { ideal: 640 },
+          height: { ideal: 480 }
+        },
+        audio: false 
+      })
+      
+      console.log('Stream obtido:', stream)
+      setCameraStream(stream)
+      setShowCamera(true)
+      
+      // Aguardar o próximo frame para garantir que o elemento existe
+      setTimeout(() => {
+        if (cameraRef.current && stream) {
+          console.log('Configurando srcObject no vídeo...')
+          cameraRef.current.srcObject = stream
+          
+          // Forçar reprodução do vídeo
+          cameraRef.current.play()
+            .then(() => {
+              console.log('Vídeo iniciado com sucesso')
+              setCameraLoading(false)
+            })
+            .catch(e => {
+              console.error('Erro ao iniciar vídeo:', e)
+              setCameraLoading(false)
+            })
+        }
+      }, 200)
+      
+    } catch (error) {
+      console.error('Erro ao acessar câmera:', error)
+      
+      // Tentar com configuração mais simples se falhou
+      try {
+        console.log('Tentando configuração fallback...')
+        const fallbackStream = await navigator.mediaDevices.getUserMedia({ 
+          video: true,
+          audio: false 
+        })
+        
+        setCameraStream(fallbackStream)
+        setShowCamera(true)
+        
+        setTimeout(() => {
+          if (cameraRef.current && fallbackStream) {
+            cameraRef.current.srcObject = fallbackStream
+            cameraRef.current.play()
+              .then(() => {
+                console.log('Vídeo fallback iniciado com sucesso')
+                setCameraLoading(false)
+              })
+              .catch(e => {
+                console.error('Erro ao iniciar vídeo (fallback):', e)
+                setCameraLoading(false)
+              })
+          }
+        }, 200)
+        
+      } catch (fallbackError) {
+        console.error('Erro ao acessar câmera (fallback):', fallbackError)
+        setCameraLoading(false)
+        alert('Não foi possível acessar a câmera. Verifique as permissões do navegador.')
+      }
+    }
+  }
+
+  const stopCamera = () => {
+    if (cameraStream) {
+      cameraStream.getTracks().forEach(track => track.stop())
+      setCameraStream(null)
+    }
+    setShowCamera(false)
+    setCameraLoading(false)
+  }
+
+  const capturePhoto = async () => {
+    if (!cameraRef.current || !canvasRef.current || !selectedPetId) return
+
+    const video = cameraRef.current
+    const canvas = canvasRef.current
+    const context = canvas.getContext('2d')
+
+    if (!context) return
+
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
+    context.drawImage(video, 0, 0)
+
+    canvas.toBlob(async (blob) => {
+      if (!blob) return
+
+      setCurrentImageBlob(blob)
+      setPhotoForm({
+        mealType: 'snack',
+        caption: `Foto capturada em ${new Date().toLocaleString('pt-BR')}`,
+        notes: '',
+        tags: 'foto, novo',
+        hasStock: false,
+        stockInfo: {
+          quantity: '',
+          unit: 'pacotes',
+          minimumAlert: ''
+        }
+      })
+      stopCamera()
+      setShowPhotoModal(true)
+    }, 'image/jpeg', 0.8)
+  }
+
+  const deletePhoto = async (photoId: string) => {
+    if (!confirm('Tem certeza que deseja remover esta foto?')) return
+
+    try {
+      await foodGalleryService.deletePhoto(photoId)
+      loadPhotos()
+      loadStats()
+      setSelectedPhoto(null)
+    } catch (error) {
+      console.error('Erro ao remover foto:', error)
+      alert('Erro ao remover foto')
+    }
+  }
+
+  const selectedPet = pets.find(p => p._id === selectedPetId)
+
+  const getMealTypeIcon = (mealType: FoodPhoto['mealType']) => {
+    switch (mealType) {
+      case 'breakfast': return '🌅'
+      case 'lunch': return '🍽️'
+      case 'dinner': return '🌙'
+      case 'snack': return '🥨'
+      default: return '🍖'
+    }
+  }
+
+  const getMealTypeLabel = (mealType: FoodPhoto['mealType']) => {
+    switch (mealType) {
+      case 'breakfast': return 'Café da manhã'
+      case 'lunch': return 'Almoço'
+      case 'dinner': return 'Jantar'
+      case 'snack': return 'Petisco'
+      default: return 'Refeição'
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 flex items-center">
+              <PhotoIcon className="h-8 w-8 text-coral-500 mr-3" />
+              Galeria de Alimentação
+            </h1>
+            <p className="text-gray-600 mt-1">
+              Registre e acompanhe a alimentação do seu pet
+            </p>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={startCamera}
+              className="flex items-center space-x-2 bg-coral-500 text-white px-4 py-2 rounded-glass hover:bg-coral-600 transition-colors"
+            >
+              <CameraSolid className="h-5 w-5" />
+              <span>Fotografar</span>
+            </motion.button>
+
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => fileInputRef.current?.click()}
+              className="flex items-center space-x-2 bg-teal-500 text-white px-4 py-2 rounded-glass hover:bg-teal-600 transition-colors"
+            >
+              <ArrowUpTrayIcon className="h-5 w-5" />
+              <span>Upload</span>
+            </motion.button>
+          </div>
+        </div>
+      </motion.div>
+
+      {/* Pet Selector */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+      >
+        <GlassCard>
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                Selecionar Pet
+              </h2>
+              <p className="text-gray-600">
+                Escolha o pet para visualizar a galeria de alimentação
+              </p>
+            </div>
+            
+            <select
+              value={selectedPetId}
+              onChange={(e) => setSelectedPetId(e.target.value)}
+              className="px-4 py-3 bg-white/50 border border-gray-200 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent text-lg font-medium"
+            >
+              <option value="">Selecione um pet</option>
+              {pets.map((pet) => (
+                <option key={pet._id} value={pet._id}>
+                  {pet.name} ({pet.species})
+                </option>
+              ))}
+            </select>
+          </div>
+        </GlassCard>
+      </motion.div>
+
+      {/* Stats */}
+      {stats && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Total de Fotos</p>
+                  <p className="text-2xl font-bold text-gray-900">{stats.totalPhotos}</p>
+                </div>
+                <div className="p-3 bg-coral-100 text-coral-600 rounded-glass">
+                  <PhotoIcon className="h-6 w-6" />
+                </div>
+              </div>
+            </GlassWidget>
+
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Esta Semana</p>
+                  <p className="text-2xl font-bold text-teal-600">{stats.photosThisWeek}</p>
+                </div>
+                <div className="p-3 bg-teal-100 text-teal-600 rounded-glass">
+                  <CalendarIcon className="h-6 w-6" />
+                </div>
+              </div>
+            </GlassWidget>
+
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Este Mês</p>
+                  <p className="text-2xl font-bold text-blue-600">{stats.photosThisMonth}</p>
+                </div>
+                <div className="p-3 bg-blue-100 text-blue-600 rounded-glass">
+                  <ChartBarIcon className="h-6 w-6" />
+                </div>
+              </div>
+            </GlassWidget>
+
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600 mb-1">Favorito</p>
+                  <p className="text-lg font-bold text-orange-600">{stats.favoriteFood || 'N/A'}</p>
+                </div>
+                <div className="p-3 bg-orange-100 text-orange-600 rounded-glass">
+                  <HeartSolid className="h-6 w-6" />
+                </div>
+              </div>
+            </GlassWidget>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Filters and Search */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.3 }}
+      >
+        <GlassCard>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-4 sm:space-y-0">
+            <div className="flex flex-wrap gap-2">
+              {(['all', 'breakfast', 'lunch', 'dinner', 'snack'] as FilterType[]).map((filterType) => (
+                <motion.button
+                  key={filterType}
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => setFilter(filterType)}
+                  className={cn(
+                    'flex items-center space-x-2 px-4 py-2 rounded-glass border transition-all text-sm font-medium',
+                    filter === filterType
+                      ? 'bg-coral-500 text-white border-coral-500'
+                      : 'bg-white/50 text-gray-700 border-gray-200 hover:bg-white/70'
+                  )}
+                >
+                  <span>{filterType !== 'all' ? getMealTypeIcon(filterType as any) : '🍽️'}</span>
+                  <span>
+                    {filterType === 'all' ? 'Todas' : getMealTypeLabel(filterType as any)}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+
+            <div className="flex items-center space-x-4">
+              <div className="relative">
+                <MagnifyingGlassIcon className="h-5 w-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+                <input
+                  type="text"
+                  placeholder="Buscar..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 pr-4 py-2 bg-white/50 border border-gray-200 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                />
+              </div>
+            </div>
+          </div>
+        </GlassCard>
+      </motion.div>
+
+      {/* Photo Grid */}
+      {selectedPetId && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
+        >
+          {filteredPhotos.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              <AnimatePresence>
+                {filteredPhotos.map((photo) => (
+                  <motion.div
+                    key={photo.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                  >
+                    <GlassCard className="overflow-hidden cursor-pointer hover:shadow-lg transition-shadow">
+                      <div 
+                        className="aspect-square relative"
+                        onClick={() => setSelectedPhoto(photo)}
+                      >
+                        <img
+                          src={photo.imageUrl}
+                          alt={photo.caption || 'Foto de alimento'}
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+                        
+                        {/* Meal Type Badge */}
+                        <div className="absolute top-2 left-2 bg-white/90 px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+                          <span>{getMealTypeIcon(photo.mealType)}</span>
+                          <span>{getMealTypeLabel(photo.mealType)}</span>
+                        </div>
+
+                        {/* Stock Info Badge */}
+                        {photo.stockInfo && (
+                          <div className="absolute top-2 right-2 bg-gradient-to-r from-teal-500 to-blue-500 text-white px-2 py-1 rounded-full text-xs font-medium flex items-center space-x-1">
+                            <span>📦</span>
+                            <span>{photo.stockInfo.currentQuantity} {photo.stockInfo.unit}</span>
+                            {photo.stockInfo.currentQuantity <= photo.stockInfo.minimumAlert && (
+                              <span className="text-yellow-300">⚠️</span>
+                            )}
+                            {photo.stockInfo.currentQuantity <= 0 && (
+                              <span className="text-red-300">🚨</span>
+                            )}
+                          </div>
+                        )}
+
+                        {/* Date */}
+                        <div className="absolute bottom-2 left-2 text-white text-xs font-medium">
+                          {photo.timestamp.toLocaleDateString('pt-BR')}
+                        </div>
+
+                        {/* Tags */}
+                        {photo.tags.length > 0 && (
+                          <div className="absolute bottom-2 right-2 text-white text-xs">
+                            #{photo.tags[0]}
+                          </div>
+                        )}
+                      </div>
+
+                      {photo.caption && (
+                        <div className="p-4">
+                          <p className="text-gray-700 text-sm line-clamp-2">
+                            {photo.caption}
+                          </p>
+                        </div>
+                      )}
+                    </GlassCard>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </div>
+          ) : (
+            <GlassCard className="text-center py-12">
+              <PhotoIcon className="h-16 w-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                {searchTerm || filter !== 'all' ? 'Nenhuma foto encontrada' : 'Nenhuma foto ainda'}
+              </h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm || filter !== 'all' 
+                  ? 'Tente ajustar os filtros ou termo de busca'
+                  : 'Comece fotografando as refeições do seu pet'
+                }
+              </p>
+              {(!searchTerm && filter === 'all') && (
+                <div className="flex justify-center space-x-3">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={startCamera}
+                    className="flex items-center space-x-2 bg-coral-500 text-white px-6 py-3 rounded-glass hover:bg-coral-600 transition-colors"
+                  >
+                    <CameraIcon className="h-5 w-5" />
+                    <span>Fotografar Agora</span>
+                  </motion.button>
+                </div>
+              )}
+            </GlassCard>
+          )}
+        </motion.div>
+      )}
+
+      {/* Camera Modal */}
+      <AnimatePresence>
+        {showCamera && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              onClick={stopCamera}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed inset-4 z-50 flex items-center justify-center"
+            >
+              <div className="bg-white rounded-2xl overflow-hidden max-w-lg w-full">
+                <div className="p-4 bg-gray-900 text-white flex items-center justify-between">
+                  <h3 className="font-semibold">Fotografar Alimento</h3>
+                  <button
+                    onClick={stopCamera}
+                    className="text-gray-300 hover:text-white"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="relative bg-black">
+                  <video
+                    ref={cameraRef}
+                    autoPlay
+                    playsInline
+                    muted
+                    className="w-full aspect-square object-cover"
+                    onLoadedMetadata={() => {
+                      // Garantir que o vídeo inicie quando os metadados forem carregados
+                      if (cameraRef.current) {
+                        cameraRef.current.play().catch(e => {
+                          console.error('Erro ao reproduzir vídeo após metadados:', e)
+                        })
+                      }
+                    }}
+                  />
+                  {/* Indicador de carregamento */}
+                  {cameraLoading && (
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                      <div className="text-center text-white">
+                        <div className="animate-spin rounded-full h-8 w-8 border-2 border-white border-t-transparent mx-auto mb-2"></div>
+                        <p className="text-sm">Iniciando câmera...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-4 flex justify-center">
+                  <motion.button
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                    onClick={capturePhoto}
+                    disabled={isLoading || cameraLoading}
+                    className="bg-coral-500 text-white px-6 py-3 rounded-full hover:bg-coral-600 transition-colors disabled:bg-gray-400 flex items-center space-x-2"
+                  >
+                    <CameraIcon className="h-5 w-5" />
+                    <span>
+                      {isLoading ? 'Salvando...' : 
+                       cameraLoading ? 'Aguarde...' : 'Capturar'}
+                    </span>
+                  </motion.button>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Photo Details Form Modal */}
+      <AnimatePresence>
+        {showPhotoModal && currentImageBlob && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              onClick={() => setShowPhotoModal(false)}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed inset-4 z-50 flex items-center justify-center p-4"
+            >
+              <div className="bg-white rounded-2xl overflow-hidden max-w-2xl w-full max-h-full overflow-y-auto">
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900">
+                      📷 Detalhes da Foto
+                    </h3>
+                    <button
+                      onClick={() => setShowPhotoModal(false)}
+                      className="p-2 text-gray-500 hover:text-gray-700 transition-colors"
+                    >
+                      ✕
+                    </button>
+                  </div>
+
+                  {/* Preview da imagem */}
+                  <div className="aspect-square rounded-glass overflow-hidden mb-6">
+                    <img
+                      src={URL.createObjectURL(currentImageBlob)}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="space-y-4">
+                    {/* Tipo de refeição */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Tipo de Alimentação
+                      </label>
+                      <div className="grid grid-cols-3 gap-2">
+                        <button
+                          onClick={() => setPhotoForm(prev => ({ ...prev, mealType: 'breakfast' }))}
+                          className={`p-2 rounded border text-sm ${photoForm.mealType === 'breakfast' ? 'bg-coral-500 text-white' : 'bg-white border-gray-200'}`}
+                        >
+                          🌅 Café manhã
+                        </button>
+                        <button
+                          onClick={() => setPhotoForm(prev => ({ ...prev, mealType: 'lunch' }))}
+                          className={`p-2 rounded border text-sm ${photoForm.mealType === 'lunch' ? 'bg-coral-500 text-white' : 'bg-white border-gray-200'}`}
+                        >
+                          🍽️ Almoço
+                        </button>
+                        <button
+                          onClick={() => setPhotoForm(prev => ({ ...prev, mealType: 'dinner' }))}
+                          className={`p-2 rounded border text-sm ${photoForm.mealType === 'dinner' ? 'bg-coral-500 text-white' : 'bg-white border-gray-200'}`}
+                        >
+                          🌙 Jantar
+                        </button>
+                        <button
+                          onClick={() => setPhotoForm(prev => ({ ...prev, mealType: 'snack' }))}
+                          className={`p-2 rounded border text-sm ${photoForm.mealType === 'snack' ? 'bg-coral-500 text-white' : 'bg-white border-gray-200'}`}
+                        >
+                          🥨 Petisco
+                        </button>
+                        <button
+                          onClick={() => setPhotoForm(prev => ({ ...prev, mealType: 'food' }))}
+                          className={`p-2 rounded border text-sm ${photoForm.mealType === 'food' ? 'bg-coral-500 text-white' : 'bg-white border-gray-200'}`}
+                        >
+                          🍖 Alimentação
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Descrição */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Descrição
+                      </label>
+                      <input
+                        type="text"
+                        value={photoForm.caption}
+                        onChange={(e) => setPhotoForm(prev => ({ ...prev, caption: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-200 rounded focus:ring-2 focus:ring-coral-500"
+                        placeholder="Ex: Ração Premium para cães adultos"
+                      />
+                    </div>
+
+                    {/* Controle de estoque */}
+                    <div className="bg-teal-50 border border-teal-200 rounded p-4">
+                      <div className="flex items-center space-x-2 mb-3">
+                        <input
+                          type="checkbox"
+                          id="hasStock"
+                          checked={photoForm.hasStock}
+                          onChange={(e) => setPhotoForm(prev => ({ ...prev, hasStock: e.target.checked }))}
+                          className="w-4 h-4 text-coral-600"
+                        />
+                        <label htmlFor="hasStock" className="text-sm font-medium text-gray-700">
+                          📦 Ativar controle de estoque
+                        </label>
+                      </div>
+                      
+                      {photoForm.hasStock && (
+                        <div className="space-y-3">
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Quantidade inicial *
+                              </label>
+                              <input
+                                type="number"
+                                value={photoForm.stockInfo.quantity}
+                                onChange={(e) => setPhotoForm(prev => ({
+                                  ...prev,
+                                  stockInfo: { ...prev.stockInfo, quantity: e.target.value }
+                                }))}
+                                className="w-full px-2 py-1 border border-teal-200 rounded text-sm"
+                                placeholder="Ex: 10"
+                                min="1"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Unidade
+                              </label>
+                              <select
+                                value={photoForm.stockInfo.unit}
+                                onChange={(e) => setPhotoForm(prev => ({
+                                  ...prev,
+                                  stockInfo: { ...prev.stockInfo, unit: e.target.value }
+                                }))}
+                                className="w-full px-2 py-1 border border-teal-200 rounded text-sm"
+                              >
+                                <option value="pacotes">Pacotes</option>
+                                <option value="latas">Latas</option>
+                                <option value="kg">Quilos (kg)</option>
+                                <option value="unidades">Unidades</option>
+                                <option value="sachês">Sachês</option>
+                                <option value="potes">Potes</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Alerta quando restarem (opcional)
+                            </label>
+                            <input
+                              type="number"
+                              value={photoForm.stockInfo.minimumAlert}
+                              onChange={(e) => setPhotoForm(prev => ({
+                                ...prev,
+                                stockInfo: { ...prev.stockInfo, minimumAlert: e.target.value }
+                              }))}
+                              className="w-full px-2 py-1 border border-teal-200 rounded text-sm"
+                              placeholder="Ex: 2 (alerta quando restarem 2)"
+                              min="0"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Botões */}
+                  <div className="flex justify-end space-x-3 mt-6">
+                    <button
+                      onClick={() => setShowPhotoModal(false)}
+                      className="px-4 py-2 text-gray-700 bg-gray-100 rounded hover:bg-gray-200"
+                    >
+                      Cancelar
+                    </button>
+                    <button
+                      onClick={savePhotoWithDetails}
+                      disabled={isLoading}
+                      className="px-4 py-2 bg-coral-500 text-white rounded hover:bg-coral-600 disabled:bg-gray-400"
+                    >
+                      {isLoading ? 'Salvando...' : 'Salvar Foto'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+
+                  {/* Preview da imagem */}
+                  <div className="aspect-square rounded-glass overflow-hidden mb-6">
+                    <img
+                      src={URL.createObjectURL(currentImageBlob)}
+                      alt="Preview"
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="space-y-6">
+                    {/* Tipo de refeição */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-3">
+                        Tipo de Alimentação
+                      </label>
+                      <div className="grid grid-cols-2 gap-3">
+                        {[
+                          { value: 'breakfast', label: 'Café da manhã', icon: '🌅' },
+                          { value: 'lunch', label: 'Almoço', icon: '🍽️' },
+                          { value: 'dinner', label: 'Jantar', icon: '🌙' },
+                          { value: 'snack', label: 'Petisco', icon: '🥨' },
+                          { value: 'food', label: 'Alimentação', icon: '🍖' }
+                        ].map((option) => (
+                          <motion.button
+                            key={option.value}
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => setPhotoForm(prev => ({ ...prev, mealType: option.value as any }))}
+                            className={cn(
+                              'flex items-center space-x-2 p-3 rounded-glass border transition-all',
+                              photoForm.mealType === option.value
+                                ? 'bg-coral-500 text-white border-coral-500'
+                                : 'bg-white/50 text-gray-700 border-gray-200 hover:bg-white/70'
+                            )}
+                          >
+                            <span>{option.icon}</span>
+                            <span className="text-sm font-medium">{option.label}</span>
+                          </motion.button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Descrição */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Descrição
+                      </label>
+                      <input
+                        type="text"
+                        value={photoForm.caption}
+                        onChange={(e) => setPhotoForm(prev => ({ ...prev, caption: e.target.value }))}
+                        className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                        placeholder="Ex: Ração Premium para cães adultos"
+                      />
+                    </div>
+
+                    {/* Tags */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Tags (separadas por vírgula)
+                      </label>
+                      <input
+                        type="text"
+                        value={photoForm.tags}
+                        onChange={(e) => setPhotoForm(prev => ({ ...prev, tags: e.target.value }))}
+                        className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                        placeholder="Ex: ração, premium, adulto"
+                      />
+                    </div>
+
+                    {/* Observações */}
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Observações (opcional)
+                      </label>
+                      <textarea
+                        value={photoForm.notes}
+                        onChange={(e) => setPhotoForm(prev => ({ ...prev, notes: e.target.value }))}
+                        className="w-full px-4 py-3 bg-white/50 border border-gray-200 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+                        rows={3}
+                        placeholder="Observações sobre o alimento..."
+                      />
+                    </div>
+
+                    {/* Sistema de estoque */}
+                    <div className="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200 rounded-glass p-4">
+                      <div className="flex items-center space-x-2 mb-4">
+                        <input
+                          type="checkbox"
+                          id="hasStock"
+                          checked={photoForm.hasStock}
+                          onChange={(e) => setPhotoForm(prev => ({ ...prev, hasStock: e.target.checked }))}
+                          className="w-4 h-4 text-coral-600 bg-gray-100 border-gray-300 rounded focus:ring-coral-500"
+                        />
+                        <label htmlFor="hasStock" className="text-sm font-medium text-gray-700">
+                          📦 Ativar controle de estoque
+                        </label>
+                      </div>
+                      
+                      {photoForm.hasStock && (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Quantidade inicial *
+                              </label>
+                              <input
+                                type="number"
+                                value={photoForm.stockInfo.quantity}
+                                onChange={(e) => setPhotoForm(prev => ({
+                                  ...prev,
+                                  stockInfo: { ...prev.stockInfo, quantity: e.target.value }
+                                }))}
+                                className="w-full px-3 py-2 bg-white/70 border border-teal-200 rounded-glass focus:ring-2 focus:ring-teal-500 text-sm"
+                                placeholder="Ex: 10"
+                                min="1"
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-xs font-medium text-gray-600 mb-1">
+                                Unidade
+                              </label>
+                              <select
+                                value={photoForm.stockInfo.unit}
+                                onChange={(e) => setPhotoForm(prev => ({
+                                  ...prev,
+                                  stockInfo: { ...prev.stockInfo, unit: e.target.value }
+                                }))}
+                                className="w-full px-3 py-2 bg-white/70 border border-teal-200 rounded-glass focus:ring-2 focus:ring-teal-500 text-sm"
+                              >
+                                <option value="pacotes">Pacotes</option>
+                                <option value="latas">Latas</option>
+                                <option value="kg">Quilos (kg)</option>
+                                <option value="unidades">Unidades</option>
+                                <option value="sachês">Sachês</option>
+                                <option value="potes">Potes</option>
+                              </select>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-medium text-gray-600 mb-1">
+                              Alerta quando restarem (opcional)
+                            </label>
+                            <input
+                              type="number"
+                              value={photoForm.stockInfo.minimumAlert}
+                              onChange={(e) => setPhotoForm(prev => ({
+                                ...prev,
+                                stockInfo: { ...prev.stockInfo, minimumAlert: e.target.value }
+                              }))}
+                              className="w-full px-3 py-2 bg-white/70 border border-teal-200 rounded-glass focus:ring-2 focus:ring-teal-500 text-sm"
+                              placeholder="Ex: 2 (alerta quando restarem 2)"
+                              min="0"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                              Será notificado quando o estoque atingir esta quantidade
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Botões */}
+                  <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowPhotoModal(false)}
+                      className="px-6 py-2 text-gray-700 bg-gray-100 rounded-glass hover:bg-gray-200 transition-colors"
+                    >
+                      Cancelar
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={savePhotoWithDetails}
+                      disabled={isLoading}
+                      className="px-6 py-2 bg-coral-500 text-white rounded-glass hover:bg-coral-600 transition-colors disabled:bg-gray-400 flex items-center space-x-2"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                          <span>Salvando...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>💾</span>
+                          <span>Salvar Foto</span>
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Photo Detail Modal */}
+      <AnimatePresence>
+        {selectedPhoto && (
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50"
+              onClick={() => setSelectedPhoto(null)}
+            />
+            
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.9 }}
+              className="fixed inset-4 z-50 flex items-center justify-center p-4"
+            >
+              <div className="bg-white rounded-2xl overflow-hidden max-w-2xl w-full max-h-full overflow-y-auto">
+                <div className="aspect-square relative">
+                  <img
+                    src={selectedPhoto.imageUrl}
+                    alt={selectedPhoto.caption || 'Foto de alimento'}
+                    className="w-full h-full object-cover"
+                  />
+                  <button
+                    onClick={() => setSelectedPhoto(null)}
+                    className="absolute top-4 right-4 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                  >
+                    ✕
+                  </button>
+                </div>
+                
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        {selectedPhoto.caption || 'Foto de alimento'}
+                      </h3>
+                      <p className="text-gray-600 text-sm">
+                        {selectedPhoto.timestamp.toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                    
+                    <div className="flex items-center space-x-2">
+                      <span className="text-2xl">{getMealTypeIcon(selectedPhoto.mealType)}</span>
+                      <span className="text-sm font-medium text-gray-700">
+                        {getMealTypeLabel(selectedPhoto.mealType)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {selectedPhoto.notes && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-2">Observações:</h4>
+                      <p className="text-gray-700 text-sm">{selectedPhoto.notes}</p>
+                    </div>
+                  )}
+
+                  {selectedPhoto.tags.length > 0 && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-2">Tags:</h4>
+                      <div className="flex flex-wrap gap-2">
+                        {selectedPhoto.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full"
+                          >
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Stock Information */}
+                  {selectedPhoto.stockInfo && (
+                    <div className="mb-4">
+                      <h4 className="text-sm font-medium text-gray-900 mb-3 flex items-center space-x-2">
+                        <span>📦</span>
+                        <span>Controle de Estoque</span>
+                      </h4>
+                      <div className="bg-gradient-to-r from-teal-50 to-blue-50 border border-teal-200 rounded-glass p-4 space-y-3">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="text-center">
+                            <div className={cn(
+                              "text-2xl font-bold",
+                              selectedPhoto.stockInfo.currentQuantity <= 0 ? 'text-red-600' :
+                              selectedPhoto.stockInfo.currentQuantity <= selectedPhoto.stockInfo.minimumAlert ? 'text-yellow-600' :
+                              'text-teal-600'
+                            )}>
+                              {selectedPhoto.stockInfo.currentQuantity}
+                            </div>
+                            <div className="text-xs text-gray-600">Restante</div>
+                          </div>
+                          <div className="text-center">
+                            <div className="text-lg font-semibold text-gray-700">
+                              {selectedPhoto.stockInfo.initialQuantity}
+                            </div>
+                            <div className="text-xs text-gray-600">Inicial</div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Unidade:</span>
+                          <span className="font-medium text-gray-900">{selectedPhoto.stockInfo.unit}</span>
+                        </div>
+                        
+                        <div className="flex items-center justify-between text-sm">
+                          <span className="text-gray-600">Alerta em:</span>
+                          <span className="font-medium text-gray-900">{selectedPhoto.stockInfo.minimumAlert} {selectedPhoto.stockInfo.unit}</span>
+                        </div>
+                        
+                        {selectedPhoto.stockInfo.estimatedDuration > 0 && (
+                          <div className="flex items-center justify-between text-sm">
+                            <span className="text-gray-600">Estimativa:</span>
+                            <span className="font-medium text-gray-900">{selectedPhoto.stockInfo.estimatedDuration} dias</span>
+                          </div>
+                        )}
+                        
+                        <div className="text-xs text-gray-500 text-center pt-2 border-t border-teal-200">
+                          Última atualização: {selectedPhoto.stockInfo.lastUpdated.toLocaleDateString('pt-BR')}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end space-x-3">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => deletePhoto(selectedPhoto.id)}
+                      className="flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-glass hover:bg-red-600 transition-colors"
+                    >
+                      <TrashIcon className="h-4 w-4" />
+                      <span>Remover</span>
+                    </motion.button>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+
+      {/* Hidden file input */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        onChange={handleFileUpload}
+        className="hidden"
+      />
+
+      {/* Hidden canvas for photo capture */}
+      <canvas ref={canvasRef} className="hidden" />
+    </div>
+  )
+}

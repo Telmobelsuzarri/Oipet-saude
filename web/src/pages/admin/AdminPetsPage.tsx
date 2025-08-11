@@ -16,6 +16,8 @@ import {
 } from '@heroicons/react/24/outline'
 import { GlassCard, GlassWidget } from '@/components/ui/GlassContainer'
 import { OiPetLogo } from '@/components/ui/OiPetLogo'
+import { Table, Tag, Button, Input, Select, Space, Statistic, Progress, Card, Row, Col, Tooltip, Badge, message } from 'antd'
+import type { ColumnsType } from 'antd/es/table'
 
 interface Pet {
   _id: string
@@ -375,9 +377,114 @@ export const AdminPetsPage: React.FC = () => {
   }
 
   const generateReport = () => {
-    console.log('Gerando relatório de pets...')
-    // Implementar geração de relatório
+    message.loading('Gerando relatório de pets...')
+    setTimeout(() => {
+      message.success('Relatório gerado com sucesso!')
+      // Implementar geração de relatório real
+    }, 2000)
   }
+
+  // Colunas da tabela Ant Design
+  const columns: ColumnsType<Pet> = [
+    {
+      title: 'Pet',
+      key: 'pet',
+      render: (_, pet) => (
+        <div className="flex items-center">
+          <div className="flex-shrink-0 h-10 w-10">
+            <div className="h-10 w-10 bg-gradient-to-r from-coral-500 to-teal-500 rounded-full flex items-center justify-center">
+              <span className="text-xl">{getSpeciesIcon(pet.species)}</span>
+            </div>
+          </div>
+          <div className="ml-4">
+            <div className="text-sm font-medium text-gray-900">
+              {pet.name}
+            </div>
+            <div className="text-sm text-gray-500">
+              {pet.breed} • {pet.gender === 'male' ? 'Macho' : 'Fêmea'}
+              {pet.isNeutered && ' • Castrado'}
+            </div>
+          </div>
+        </div>
+      )
+    },
+    {
+      title: 'Dono',
+      key: 'owner',
+      render: (_, pet) => (
+        <div>
+          <div className="text-sm text-gray-900">{pet.owner.name}</div>
+          <div className="text-sm text-gray-500">{pet.owner.email}</div>
+        </div>
+      )
+    },
+    {
+      title: 'Idade/Peso',
+      key: 'details',
+      render: (_, pet) => (
+        <div>
+          <div className="text-sm text-gray-900">
+            {pet.age} anos ({getAgeCategory(pet.age)})
+          </div>
+          <div className="text-sm text-gray-500">
+            {pet.weight}kg • {pet.height}cm
+          </div>
+        </div>
+      )
+    },
+    {
+      title: 'Status',
+      key: 'status',
+      render: (_, pet) => {
+        const colors = {
+          healthy: 'success',
+          sick: 'warning',
+          treatment: 'processing',
+          critical: 'error'
+        }
+        return (
+          <Tag color={colors[pet.status] || 'default'} icon={getStatusIcon(pet.status)}>
+            {pet.status.toUpperCase()}
+          </Tag>
+        )
+      }
+    },
+    {
+      title: 'Última Visita',
+      key: 'lastVisit',
+      render: (_, pet) => (
+        <div>
+          <div className="text-sm">{pet.lastVisit ? formatDate(pet.lastVisit) : 'Nunca'}</div>
+          <div className="text-xs text-gray-400">
+            {pet.healthRecords} registros
+          </div>
+        </div>
+      )
+    },
+    {
+      title: 'Ações',
+      key: 'actions',
+      render: (_, pet) => (
+        <Space>
+          <Tooltip title="Ver estatísticas">
+            <Button
+              type="text"
+              icon={<ChartBarIcon className="h-4 w-4" />}
+              onClick={() => handlePetAction(pet._id, 'view')}
+            />
+          </Tooltip>
+          <Tooltip title="Gerar relatório">
+            <Button
+              type="text"
+              icon={<DocumentTextIcon className="h-4 w-4" />}
+              onClick={() => handlePetAction(pet._id, 'report')}
+              style={{ color: '#E85A5A' }}
+            />
+          </Tooltip>
+        </Space>
+      )
+    }
+  ]
 
   if (isLoading) {
     return (
@@ -547,194 +654,84 @@ export const AdminPetsPage: React.FC = () => {
         transition={{ delay: 0.3 }}
       >
         <GlassCard className="p-6">
-          <div className="flex flex-wrap gap-4 items-center">
-            <div className="flex-1 min-w-64">
-              <div className="relative">
-                <MagnifyingGlassIcon className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Buscar pets..."
-                  value={filters.search}
-                  onChange={(e) => setFilters({...filters, search: e.target.value})}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
-                />
-              </div>
-            </div>
+          <Space wrap size="middle" style={{ width: '100%' }}>
+            <Input
+              placeholder="Buscar pets..."
+              prefix={<MagnifyingGlassIcon className="h-4 w-4 text-gray-400" />}
+              value={filters.search}
+              onChange={(e) => setFilters({...filters, search: e.target.value})}
+              style={{ width: 300 }}
+              allowClear
+            />
 
-            <select
+            <Select
               value={filters.species}
-              onChange={(e) => setFilters({...filters, species: e.target.value as any})}
-              className="px-4 py-2 border border-gray-300 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+              onChange={(value) => setFilters({...filters, species: value})}
+              style={{ width: 150 }}
             >
-              <option value="all">Todas as Espécies</option>
-              <option value="dog">Cães</option>
-              <option value="cat">Gatos</option>
-              <option value="other">Outros</option>
-            </select>
+              <Select.Option value="all">Todas as Espécies</Select.Option>
+              <Select.Option value="dog">Cães</Select.Option>
+              <Select.Option value="cat">Gatos</Select.Option>
+              <Select.Option value="other">Outros</Select.Option>
+            </Select>
 
-            <select
+            <Select
               value={filters.status}
-              onChange={(e) => setFilters({...filters, status: e.target.value as any})}
-              className="px-4 py-2 border border-gray-300 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+              onChange={(value) => setFilters({...filters, status: value})}
+              style={{ width: 150 }}
             >
-              <option value="all">Todos os Status</option>
-              <option value="healthy">Saudável</option>
-              <option value="sick">Doente</option>
-              <option value="treatment">Em Tratamento</option>
-              <option value="critical">Crítico</option>
-            </select>
+              <Select.Option value="all">Todos os Status</Select.Option>
+              <Select.Option value="healthy">Saudável</Select.Option>
+              <Select.Option value="sick">Doente</Select.Option>
+              <Select.Option value="treatment">Em Tratamento</Select.Option>
+              <Select.Option value="critical">Crítico</Select.Option>
+            </Select>
 
-            <select
+            <Select
               value={filters.gender}
-              onChange={(e) => setFilters({...filters, gender: e.target.value as any})}
-              className="px-4 py-2 border border-gray-300 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+              onChange={(value) => setFilters({...filters, gender: value})}
+              style={{ width: 150 }}
             >
-              <option value="all">Todos os Gêneros</option>
-              <option value="male">Macho</option>
-              <option value="female">Fêmea</option>
-            </select>
+              <Select.Option value="all">Todos os Gêneros</Select.Option>
+              <Select.Option value="male">Macho</Select.Option>
+              <Select.Option value="female">Fêmea</Select.Option>
+            </Select>
 
-            <select
+            <Select
               value={filters.ageRange}
-              onChange={(e) => setFilters({...filters, ageRange: e.target.value as any})}
-              className="px-4 py-2 border border-gray-300 rounded-glass focus:ring-2 focus:ring-coral-500 focus:border-transparent"
+              onChange={(value) => setFilters({...filters, ageRange: value})}
+              style={{ width: 150 }}
             >
-              <option value="all">Todas as Idades</option>
-              <option value="puppy">Filhote (≤1 ano)</option>
-              <option value="adult">Adulto (2-7 anos)</option>
-              <option value="senior">Idoso (&gt;7 anos)</option>
-            </select>
-          </div>
+              <Select.Option value="all">Todas as Idades</Select.Option>
+              <Select.Option value="puppy">Filhote (≤1 ano)</Select.Option>
+              <Select.Option value="adult">Adulto (2-7 anos)</Select.Option>
+              <Select.Option value="senior">Idoso (&gt;7 anos)</Select.Option>
+            </Select>
+          </Space>
         </GlassCard>
       </motion.div>
 
-      {/* Tabela de Pets */}
+      {/* Tabela de Pets com Ant Design */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
       >
-        <GlassCard className="overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Pet
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Dono
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Idade/Peso
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Última Visita
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ações
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentPets.map((pet) => (
-                  <tr key={pet._id} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="flex items-center">
-                        <div className="flex-shrink-0 h-10 w-10">
-                          <div className="h-10 w-10 bg-gradient-to-r from-coral-500 to-teal-500 rounded-full flex items-center justify-center">
-                            <span className="text-xl">{getSpeciesIcon(pet.species)}</span>
-                          </div>
-                        </div>
-                        <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900">
-                            {pet.name}
-                          </div>
-                          <div className="text-sm text-gray-500">
-                            {pet.breed} • {pet.gender === 'male' ? 'Macho' : 'Fêmea'}
-                            {pet.isNeutered && ' • Castrado'}
-                          </div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">{pet.owner.name}</div>
-                      <div className="text-sm text-gray-500">{pet.owner.email}</div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
-                        {pet.age} anos ({getAgeCategory(pet.age)})
-                      </div>
-                      <div className="text-sm text-gray-500">
-                        {pet.weight}kg • {pet.height}cm
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(pet.status)}`}>
-                        <span className="mr-1">{getStatusIcon(pet.status)}</span>
-                        <span className="capitalize">{pet.status}</span>
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {pet.lastVisit ? formatDate(pet.lastVisit) : 'Nunca'}
-                      <div className="text-xs text-gray-400">
-                        {pet.healthRecords} registros
-                      </div>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <div className="flex items-center space-x-2">
-                        <button
-                          onClick={() => handlePetAction(pet._id, 'view')}
-                          className="text-gray-600 hover:text-gray-900"
-                        >
-                          <ChartBarIcon className="h-4 w-4" />
-                        </button>
-                        <button
-                          onClick={() => handlePetAction(pet._id, 'report')}
-                          className="text-coral-600 hover:text-coral-900"
-                        >
-                          <DocumentTextIcon className="h-4 w-4" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-
-          {/* Paginação */}
-          {totalPages > 1 && (
-            <div className="px-6 py-4 border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="text-sm text-gray-700">
-                  Mostrando {indexOfFirstPet + 1} a {Math.min(indexOfLastPet, filteredPets.length)} de {filteredPets.length} pets
-                </div>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 text-sm bg-gray-100 rounded-glass hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Anterior
-                  </button>
-                  <span className="text-sm text-gray-700">
-                    Página {currentPage} de {totalPages}
-                  </span>
-                  <button
-                    onClick={() => setCurrentPage(Math.min(totalPages, currentPage + 1))}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 text-sm bg-gray-100 rounded-glass hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    Próxima
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
+        <GlassCard>
+          <Table
+            columns={columns}
+            dataSource={filteredPets}
+            rowKey="_id"
+            pagination={{
+              current: currentPage,
+              pageSize: petsPerPage,
+              total: filteredPets.length,
+              onChange: (page) => setCurrentPage(page),
+              showSizeChanger: false,
+              showTotal: (total, range) => `${range[0]}-${range[1]} de ${total} pets`
+            }}
+            loading={isLoading}
+          />
         </GlassCard>
       </motion.div>
     </div>

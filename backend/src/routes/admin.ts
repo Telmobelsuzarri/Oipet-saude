@@ -4,7 +4,7 @@
 
 import express from 'express';
 import { asyncHandler } from '@/middleware/errorHandler';
-import { authenticate, requireAdmin } from '@/middleware/auth';
+import { auth as authenticate, requireAdmin } from '@/middleware/auth';
 import { analyticsService } from '@/services/analyticsService';
 
 const router = express.Router();

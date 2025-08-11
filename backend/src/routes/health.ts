@@ -4,9 +4,9 @@
 
 import express from 'express';
 import { asyncHandler } from '@/middleware/errorHandler';
-import { authenticate } from '@/middleware/auth';
+import { auth as authenticate } from '@/middleware/auth';
 import { validate, healthValidators } from '@/utils/validators';
-import { healthService } from '@/services/healthService-simple';
+import { healthService } from '@/services/healthService';
 
 const router = express.Router();
 

@@ -40,15 +40,7 @@
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
 }
 
-/* Glass variations */
-.glass-widget {
-  background: rgba(255, 255, 255, 0.15);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
-}
+/* Glass base utilities */
 
 @layer base {
   html {
@@ -140,9 +132,9 @@
     @apply glass-widget hover:bg-white/20 text-gray-700 font-medium px-6 py-3 rounded-glass transition-all duration-200 transform hover:scale-105 active:scale-95;
   }
 
-  /* Input Styling */
+  /* Input Fields */
   .input-glass {
-    @apply glass-widget bg-white/5 border-white/20 rounded-glass px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-500/50 focus:border-coral-500/50 transition-all duration-200;
+    @apply glass-widget bg-white/10 border-white/20 rounded-glass px-4 py-3 text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-coral-500/50 focus:border-coral-500/50 transition-all duration-200;
   }
 
   /* Card Styling */

@@ -19,6 +19,8 @@ import { ecommerceAnalytics } from '@/services/ecommerceAnalytics'
 
 export const AdminEcommerceAnalyticsPage: React.FC = () => {
   const [analyticsData, setAnalyticsData] = useState<any>(null)
+  const [backendAnalytics, setBackendAnalytics] = useState<any>(null)
+  const [backendPopularProducts, setBackendPopularProducts] = useState<any[]>([])
   const [searchAnalytics, setSearchAnalytics] = useState<any[]>([])
   const [categoryAnalytics, setCategoryAnalytics] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
@@ -39,6 +41,7 @@ export const AdminEcommerceAnalyticsPage: React.FC = () => {
         ecommerceAnalytics.generateMockData(30)
       }
       
+      // Load local analytics data
       const data = ecommerceAnalytics.getAnalyticsData()
       const searchData = ecommerceAnalytics.getSearchAnalytics()
       const categoryData = ecommerceAnalytics.getCategoryAnalytics()
@@ -46,6 +49,17 @@ export const AdminEcommerceAnalyticsPage: React.FC = () => {
       setAnalyticsData(data)
       setSearchAnalytics(searchData)
       setCategoryAnalytics(categoryData)
+      
+      // Load backend analytics data
+      try {
+        const backendDashboard = await ecommerceAnalytics.getBackendAnalytics()
+        const backendProducts = await ecommerceAnalytics.getBackendPopularProducts(10)
+        
+        setBackendAnalytics(backendDashboard)
+        setBackendPopularProducts(backendProducts)
+      } catch (backendError) {
+        console.log('Backend analytics não disponível, usando apenas dados locais')
+      }
       
     } catch (err) {
       setError('Erro ao carregar analytics de e-commerce')
@@ -146,13 +160,89 @@ export const AdminEcommerceAnalyticsPage: React.FC = () => {
         </div>
       )}
 
-      {/* Métricas Principais */}
+      {/* Backend Analytics Stats */}
+      {backendAnalytics && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.05 }}
+        >
+          <div className="mb-4">
+            <h2 className="text-xl font-semibold text-gray-900 mb-2">Analytics Backend (Servidor)</h2>
+            <p className="text-sm text-gray-600">Dados coletados via API do backend</p>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Visualizações Hoje</p>
+                  <p className="text-2xl font-bold text-gray-900">{backendAnalytics.todayViews}</p>
+                  <p className="text-xs text-gray-500 mt-1">backend tracking</p>
+                </div>
+                <div className="p-3 bg-purple-100 rounded-glass">
+                  <EyeIcon className="h-6 w-6 text-purple-600" />
+                </div>
+              </div>
+            </GlassWidget>
+
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Visualizações Ontem</p>
+                  <p className="text-2xl font-bold text-gray-900">{backendAnalytics.yesterdayViews}</p>
+                  <p className="text-xs text-gray-500 mt-1">comparação</p>
+                </div>
+                <div className="p-3 bg-indigo-100 rounded-glass">
+                  <ChartBarIcon className="h-6 w-6 text-indigo-600" />
+                </div>
+              </div>
+            </GlassWidget>
+
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Última Semana</p>
+                  <p className="text-2xl font-bold text-gray-900">{backendAnalytics.weekViews}</p>
+                  <p className="text-xs text-gray-500 mt-1">7 dias</p>
+                </div>
+                <div className="p-3 bg-cyan-100 rounded-glass">
+                  <CalendarIcon className="h-6 w-6 text-cyan-600" />
+                </div>
+              </div>
+            </GlassWidget>
+
+            <GlassWidget className="p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Taxa Crescimento</p>
+                  <p className="text-2xl font-bold text-gray-900">{backendAnalytics.growthRate.toFixed(1)}%</p>
+                  <p className="text-xs text-gray-500 mt-1">hoje vs ontem</p>
+                </div>
+                <div className="p-3 bg-green-100 rounded-glass">
+                  {backendAnalytics.growthRate >= 0 ? (
+                    <ArrowTrendingUpIcon className="h-6 w-6 text-green-600" />
+                  ) : (
+                    <ArrowTrendingDownIcon className="h-6 w-6 text-red-600" />
+                  )}
+                </div>
+              </div>
+            </GlassWidget>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Métricas Principais - Local */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
       >
+        <div className="mb-4">
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Analytics Local (Frontend)</h2>
+          <p className="text-sm text-gray-600">Dados coletados localmente no navegador</p>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      
         <GlassWidget className="p-6">
           <div className="flex items-center justify-between">
             <div>
@@ -204,6 +294,7 @@ export const AdminEcommerceAnalyticsPage: React.FC = () => {
             </div>
           </div>
         </GlassWidget>
+        </div>
       </motion.div>
 
       {/* Funil de Conversão */}
@@ -290,6 +381,40 @@ export const AdminEcommerceAnalyticsPage: React.FC = () => {
         </GlassCard>
       </motion.div>
 
+      {/* Backend Popular Products */}
+      {backendPopularProducts.length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <GlassCard className="p-6">
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">
+              Produtos Mais Visualizados (Backend)
+            </h3>
+            <div className="space-y-3">
+              {backendPopularProducts.slice(0, 5).map((product: any, index: number) => (
+                <div key={product.productId} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                  <div className="flex items-center space-x-3">
+                    <span className="flex-shrink-0 w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-sm font-bold">
+                      {index + 1}
+                    </span>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">{product.productId}</p>
+                      <p className="text-xs text-gray-600">{product.totalViews} visualizações</p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="text-sm font-bold text-purple-600">{product.uniqueUserCount}</p>
+                    <p className="text-xs text-gray-600">usuários únicos</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </GlassCard>
+        </motion.div>
+      )}
+
       {/* Top Produtos e Analytics */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -297,9 +422,9 @@ export const AdminEcommerceAnalyticsPage: React.FC = () => {
         transition={{ delay: 0.3 }}
         className="grid grid-cols-1 lg:grid-cols-2 gap-6"
       >
-        {/* Top Produtos */}
+        {/* Top Produtos - Local */}
         <GlassCard className="p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Produtos Mais Visualizados</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-4">Produtos Mais Visualizados (Local)</h3>
           <div className="space-y-3">
             {analyticsData.topProducts.slice(0, 5).map((product: any, index: number) => (
               <div key={product.productId} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
