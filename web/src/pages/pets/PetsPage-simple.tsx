@@ -8,7 +8,7 @@ import { AddPetModal } from '@/components/modals/AddPetModal'
 import { GlassContainer } from '@/components/ui/GlassContainer'
 import { OiPetLogo } from '@/components/ui/OiPetLogo'
 
-export const PetsPage: React.FC = () => {
+const PetsPage: React.FC = () => {
   const { pets, fetchPets, isLoading } = usePetStore()
   const { user, logout } = useAuthStore()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -196,3 +196,6 @@ export const PetsPage: React.FC = () => {
     </div>
   )
 }
+
+export default PetsPage
+export { PetsPage }

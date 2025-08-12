@@ -1,6 +1,16 @@
 const express = require('express');
 const cors = require('cors');
 
+// Tentar carregar o servidor completo
+try {
+  console.log('Tentando carregar servidor completo...');
+  require('./backend/server.js');
+  return; // Se funcionar, sair daqui
+} catch (error) {
+  console.log('Erro ao carregar servidor completo:', error.message);
+  console.log('Continuando com servidor simples...');
+}
+
 const app = express();
 const PORT = process.env.PORT || 3001;
 

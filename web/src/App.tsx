@@ -6,17 +6,23 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 
 // Auth Pages - usando versões que funcionam
-import { LoginPage } from './pages/auth/LoginPage-simple'
+import LoginPageSimple from './pages/auth/LoginPage-simple'
 import { RegisterPage } from './pages/auth/RegisterPage'
 
-// Main Pages - usando versões que funcionam
-import { DashboardPage } from './pages/dashboard/DashboardPage-simple'
-import { PetsPage } from './pages/pets/PetsPage-simple'
+// Main Pages - usando versões que funcionam  
+import DashboardPageSimple from './pages/dashboard/DashboardPage-simple'
+import PetsPageSimple from './pages/pets/PetsPage-simple'
 import { HealthPageReal as HealthPage } from './pages/health/HealthPageReal'
 import { HealthTrackingPage } from './pages/health/HealthTrackingPage'
 
 // Public Pages
-import { LandingPage } from './pages/public/LandingPage-simple'
+import LandingPageSimple from './pages/public/LandingPage-simple'
+
+// Rename imports
+const LoginPage = LoginPageSimple
+const DashboardPage = DashboardPageSimple
+const PetsPage = PetsPageSimple
+const LandingPage = LandingPageSimple
 
 // Admin Pages - páginas reais
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'

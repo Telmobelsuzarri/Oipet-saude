@@ -16,7 +16,7 @@ import { FoodPhotoWidget } from '@/components/gallery/FoodPhotoWidget'
 import { UpcomingAppointmentsWidget } from '@/components/appointments/UpcomingAppointmentsWidget'
 import { ChallengesWidget } from '@/components/dashboard/ChallengesWidget'
 
-export const DashboardPage: React.FC = () => {
+const DashboardPage: React.FC = () => {
   const { user } = useAuthStore()
   const { pets, fetchPets } = usePetStore()
   const [isAddModalOpen, setIsAddModalOpen] = useState(false)
@@ -596,3 +596,6 @@ export const DashboardPage: React.FC = () => {
     </div>
   )
 }
+
+export default DashboardPage
+export { DashboardPage }

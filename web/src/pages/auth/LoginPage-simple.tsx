@@ -5,7 +5,7 @@ import { useAuthStore } from '@/stores/authStore'
 import { GlassContainer } from '@/components/ui/GlassContainer'
 import { OiPetLogo } from '@/components/ui/OiPetLogo'
 
-export const LoginPage: React.FC = () => {
+const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const { login, isLoading } = useAuthStore()
@@ -131,3 +131,6 @@ export const LoginPage: React.FC = () => {
     </motion.div>
   )
 }
+
+export default LoginPage
+export { LoginPage }
