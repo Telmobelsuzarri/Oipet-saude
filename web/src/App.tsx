@@ -6,17 +6,17 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 
 // Auth Pages - usando versões que funcionam
-import { LoginPage } from '@/pages/auth/LoginPage-simple'
-import { RegisterPage } from '@/pages/auth/RegisterPage'
+import { LoginPage } from './pages/auth/LoginPage-simple'
+import { RegisterPage } from './pages/auth/RegisterPage'
 
 // Main Pages - usando versões que funcionam
-import { DashboardPage } from '@/pages/dashboard/DashboardPage-simple'
-import { PetsPage } from '@/pages/pets/PetsPage-simple'
-import { HealthPageReal as HealthPage } from '@/pages/health/HealthPageReal'
-import { HealthTrackingPage } from '@/pages/health/HealthTrackingPage'
+import { DashboardPage } from './pages/dashboard/DashboardPage-simple'
+import { PetsPage } from './pages/pets/PetsPage-simple'
+import { HealthPageReal as HealthPage } from './pages/health/HealthPageReal'
+import { HealthTrackingPage } from './pages/health/HealthTrackingPage'
 
 // Public Pages
-import { LandingPage } from '@/pages/public/LandingPage-simple'
+import { LandingPage } from './pages/public/LandingPage-simple'
 
 // Admin Pages - páginas reais
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
@@ -29,25 +29,25 @@ import { AdminEcommerceAnalyticsPage } from '@/pages/admin/AdminEcommerceAnalyti
 import { StorePage } from '@/pages/store/StorePage'
 
 // Real Scanner Page (now Food Gallery)
-import { FoodGalleryPage } from '@/pages/gallery/FoodGalleryPageSimple'
+import { FoodGalleryPage } from './pages/gallery/FoodGalleryPageSimple'
 
 // Real Reports Page
-import { ReportsPage } from '@/pages/reports/ReportsPage'
+import { ReportsPage } from './pages/reports/ReportsPage'
 
 // Real Recommendations Page
-import { RecommendationsPage } from '@/pages/recommendations/RecommendationsPage'
+import { RecommendationsPage } from './pages/recommendations/RecommendationsPage'
 
 // Real Notifications Page
-import { NotificationsPage } from '@/pages/notifications/NotificationsPage'
+import { NotificationsPage } from './pages/notifications/NotificationsPage'
 
 // Real Profile Page with Gamification
-import { ProfilePageGamified as ProfilePage } from '@/pages/profile/ProfilePageGamified'
+import { ProfilePageGamified as ProfilePage } from './pages/profile/ProfilePageGamified'
 
 // Export Demo Page
-import { ExportDemoPage } from '@/pages/reports/ExportDemoPage'
-import { TestExportPage } from '@/pages/reports/TestExportPage'
-import { SimpleExportTest } from '@/pages/reports/SimpleExportTest'
-import { QuickExportTest } from '@/pages/reports/QuickExportTest'
+import { ExportDemoPage } from './pages/reports/ExportDemoPage'
+import { TestExportPage } from './pages/reports/TestExportPage'
+import { SimpleExportTest } from './pages/reports/SimpleExportTest'
+import { QuickExportTest } from './pages/reports/QuickExportTest'
 
 // Veterinarians Pages
 import { VeterinariansPage } from '@/pages/veterinarians/VeterinariansPage'
