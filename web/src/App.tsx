@@ -5,33 +5,52 @@ import { useAuthStore } from '@/stores/authStore'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 
-// Import direto das páginas que existem
-const LoginPage = React.lazy(() => import('./pages/auth/LoginPage-simple').then(m => ({ default: m.LoginPage || m.default })))
-const RegisterPage = React.lazy(() => import('./pages/auth/RegisterPage').then(m => ({ default: m.RegisterPage || m.default })))
-const LandingPage = React.lazy(() => import('./pages/public/LandingPage-simple').then(m => ({ default: m.LandingPage || m.default })))
-const DashboardPage = React.lazy(() => import('./pages/dashboard/DashboardPage-simple').then(m => ({ default: m.DashboardPage || m.default })))
-const PetsPage = React.lazy(() => import('./pages/pets/PetsPage-simple').then(m => ({ default: m.PetsPage || m.default })))
+// Auth Pages - versões que funcionam
+import LoginPageSimple from './pages/auth/LoginPage-simple'
+import { RegisterPage } from './pages/auth/RegisterPage'
 
-// Health Pages
+// Main Pages - versões que funcionam  
+import DashboardPageSimple from './pages/dashboard/DashboardPage-simple'
+import PetsPageSimple from './pages/pets/PetsPage-simple'
 import { HealthPageReal as HealthPage } from './pages/health/HealthPageReal'
 import { HealthTrackingPage } from './pages/health/HealthTrackingPage'
 
-// Admin Pages
+// Public Pages
+import LandingPageSimple from './pages/public/LandingPage-simple'
+
+// Rename imports
+const LoginPage = LoginPageSimple
+const DashboardPage = DashboardPageSimple
+const PetsPage = PetsPageSimple
+const LandingPage = LandingPageSimple
+
+// Admin Pages - páginas reais
 import { AdminDashboardPage } from '@/pages/admin/AdminDashboardPage'
 import { AdminUsersPage } from '@/pages/admin/AdminUsersPage'
 import { AdminAnalyticsPage } from '@/pages/admin/AdminAnalyticsPage'
 import { AdminPetsPage } from '@/pages/admin/AdminPetsPage'
 import { AdminEcommerceAnalyticsPage } from '@/pages/admin/AdminEcommerceAnalyticsPage'
 
-// Other Pages
+// Real Store Page
 import { StorePage } from '@/pages/store/StorePage'
-import { FoodGalleryPage } from './pages/gallery/FoodGalleryPageSimple'
+
+// Real Scanner Page (now Food Gallery)
+import FoodGalleryPageSimple from './pages/gallery/FoodGalleryPageSimple'
+const FoodGalleryPage = FoodGalleryPageSimple
+
+// Real Reports Page
 import { ReportsPage } from './pages/reports/ReportsPage'
+
+// Real Recommendations Page
 import { RecommendationsPage } from './pages/recommendations/RecommendationsPage'
+
+// Real Notifications Page
 import { NotificationsPage } from './pages/notifications/NotificationsPage'
+
+// Real Profile Page with Gamification
 import { ProfilePageGamified as ProfilePage } from './pages/profile/ProfilePageGamified'
 
-// Export Demo Pages
+// Export Demo Page
 import { ExportDemoPage } from './pages/reports/ExportDemoPage'
 import { TestExportPage } from './pages/reports/TestExportPage'
 import { SimpleExportTest } from './pages/reports/SimpleExportTest'
@@ -44,88 +63,113 @@ import { VeterinarianDetailPage } from '@/pages/veterinarians/VeterinarianDetail
 // Appointments Page
 import { AppointmentsPage } from '@/pages/appointments/AppointmentsPage'
 
-// Weekly Challenges Page
+// Challenges Pages
 import { WeeklyChallengesPage } from '@/pages/challenges/WeeklyChallengesPage'
 
-// Other Pages
-import { SettingsPage } from '@/pages/settings/SettingsPage'
-import { PetDetailPage } from '@/pages/pets/PetDetailPage'
-import { AboutPage } from '@/pages/public/AboutPage'
-import { ContactPage } from '@/pages/public/ContactPage'
-import { NotFoundPage } from '@/pages/error/NotFoundPage'
-
-import React, { Suspense } from 'react'
-
-// Loading component
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center">
-    <div className="text-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-coral-600 mx-auto mb-4"></div>
-      <p className="text-gray-600">Carregando...</p>
-    </div>
-  </div>
-)
+// Quality Placeholders
+import { 
+  ForgotPasswordPage,
+  PetDetailPage,
+  SettingsPage,
+  AboutPage,
+  ContactPage,
+  NotFoundPage
+} from '@/pages/placeholder/QualityPlaceholder'
 
 function App() {
   const { isAuthenticated, user } = useAuthStore()
 
   return (
-    <Suspense fallback={<PageLoader />}>
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       <Routes>
         {/* Public Routes */}
         <Route path="/" element={<LandingPage />} />
         <Route path="/about" element={<AboutPage />} />
         <Route path="/contact" element={<ContactPage />} />
-        
+
         {/* Auth Routes */}
-        <Route element={<AuthLayout />}>
-          <Route path="/auth/login" element={<LoginPage />} />
-          <Route path="/auth/register" element={<RegisterPage />} />
+        <Route path="/auth" element={<AuthLayout />}>
+          <Route 
+            path="login" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/app/dashboard" replace />
+              ) : (
+                <LoginPage />
+              )
+            } 
+          />
+          <Route 
+            path="register" 
+            element={
+              isAuthenticated ? (
+                <Navigate to="/app/dashboard" replace />
+              ) : (
+                <RegisterPage />
+              )
+            } 
+          />
+          <Route path="forgot-password" element={<ForgotPasswordPage />} />
+          <Route index element={<Navigate to="/auth/login" replace />} />
         </Route>
 
-        {/* Protected Routes - Regular Users */}
-        <Route element={
-          isAuthenticated ? <AppLayout /> : <Navigate to="/auth/login" replace />
-        }>
-          <Route path="/dashboard" element={<DashboardPage />} />
-          <Route path="/pets" element={<PetsPage />} />
-          <Route path="/pets/:id" element={<PetDetailPage />} />
-          <Route path="/health" element={<HealthPage />} />
-          <Route path="/health/tracking" element={<HealthTrackingPage />} />
-          <Route path="/scanner" element={<FoodGalleryPage />} />
-          <Route path="/store" element={<StorePage />} />
-          <Route path="/reports" element={<ReportsPage />} />
-          <Route path="/recommendations" element={<RecommendationsPage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/appointments" element={<AppointmentsPage />} />
-          <Route path="/challenges" element={<WeeklyChallengesPage />} />
-          <Route path="/veterinarians" element={<VeterinariansPage />} />
-          <Route path="/veterinarians/:id" element={<VeterinarianDetailPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/settings" element={<SettingsPage />} />
-          
-          {/* Export Demo Routes */}
-          <Route path="/reports/export-demo" element={<ExportDemoPage />} />
-          <Route path="/reports/test-export" element={<TestExportPage />} />
-          <Route path="/reports/simple-export" element={<SimpleExportTest />} />
-          <Route path="/reports/quick-export" element={<QuickExportTest />} />
+        {/* Protected Routes */}
+        <Route 
+          path="/app" 
+          element={
+            isAuthenticated ? (
+              <AppLayout />
+            ) : (
+              <Navigate to="/auth/login" replace />
+            )
+          }
+        >
+          {/* Main App Routes */}
+          <Route index element={<Navigate to="/app/dashboard" replace />} />
+          <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="pets" element={<PetsPage />} />
+          <Route path="pets/:id" element={<PetDetailPage />} />
+          <Route path="health" element={<HealthPage />} />
+          <Route path="health/tracking" element={<HealthTrackingPage />} />
+          <Route path="scanner" element={<FoodGalleryPage />} />
+          <Route path="gallery" element={<FoodGalleryPage />} />
+          <Route path="store" element={<StorePage />} />
+          <Route path="reports" element={<ReportsPage />} />
+          <Route path="reports/export-demo" element={<ExportDemoPage />} />
+          <Route path="reports/test-export" element={<TestExportPage />} />
+          <Route path="reports/simple-test" element={<SimpleExportTest />} />
+          <Route path="reports/quick-test" element={<QuickExportTest />} />
+          <Route path="recommendations" element={<RecommendationsPage />} />
+          <Route path="notifications" element={<NotificationsPage />} />
+          <Route path="appointments" element={<AppointmentsPage />} />
+          <Route path="profile" element={<ProfilePage />} />
+          <Route path="settings" element={<SettingsPage />} />
+          <Route path="veterinarians" element={<VeterinariansPage />} />
+          <Route path="veterinarians/:id" element={<VeterinarianDetailPage />} />
+          <Route path="challenges" element={<WeeklyChallengesPage />} />
+
+          {/* Admin Routes */}
+          {user?.isAdmin && (
+            <>
+              <Route path="admin" element={<Navigate to="/app/admin/dashboard" replace />} />
+              <Route path="admin/dashboard" element={<AdminDashboardPage />} />
+              <Route path="admin/users" element={<AdminUsersPage />} />
+              <Route path="admin/pets" element={<AdminPetsPage />} />
+              <Route path="admin/analytics" element={<AdminAnalyticsPage />} />
+              <Route path="admin/ecommerce" element={<AdminEcommerceAnalyticsPage />} />
+            </>
+          )}
         </Route>
 
-        {/* Protected Routes - Admin Only */}
-        <Route element={
-          isAuthenticated && user?.isAdmin ? <AppLayout /> : <Navigate to="/auth/login" replace />
-        }>
-          <Route path="/admin" element={<AdminDashboardPage />} />
-          <Route path="/admin/users" element={<AdminUsersPage />} />
-          <Route path="/admin/analytics" element={<AdminAnalyticsPage />} />
-          <Route path="/admin/pets" element={<AdminPetsPage />} />
-          <Route path="/admin/ecommerce" element={<AdminEcommerceAnalyticsPage />} />
-        </Route>
+        {/* Redirect authenticated users from auth pages */}
+        {isAuthenticated && (
+          <Route path="/auth/*" element={<Navigate to="/app/dashboard" replace />} />
+        )}
 
-        {/* 404 Route */}
+        {/* 404 Page */}
         <Route path="*" element={<NotFoundPage />} />
       </Routes>
-    </Suspense>
+    </div>
   )
 }
 

@@ -17,7 +17,7 @@ import { cn } from '@/lib/utils'
 
 type FilterType = 'all' | 'breakfast' | 'lunch' | 'dinner' | 'snack' | 'food'
 
-export const FoodGalleryPage: React.FC = () => {
+export const FoodGalleryPageSimple: React.FC = () => {
   console.log('FoodGalleryPage rendering...')
   
   const [selectedPetId, setSelectedPetId] = useState<string>('')
@@ -750,3 +750,5 @@ export const FoodGalleryPage: React.FC = () => {
     </div>
   )
 }
+
+export default FoodGalleryPageSimple
