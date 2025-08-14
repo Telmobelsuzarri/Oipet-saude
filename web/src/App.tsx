@@ -6,17 +6,17 @@ import { AppLayout } from '@/components/layout/AppLayout'
 import { AuthLayout } from '@/components/layout/AuthLayout'
 
 // Auth Pages - versões que funcionam
-import LoginPageSimple from './pages/auth/LoginPage-simple.tsx'
-import { RegisterPage } from './pages/auth/RegisterPage'
+import LoginPageSimple from '@/pages/auth/LoginPage-simple'
+import { RegisterPage } from '@/pages/auth/RegisterPage'
 
 // Main Pages - versões que funcionam  
-import DashboardPageSimple from './pages/dashboard/DashboardPage-simple.tsx'
-import PetsPageSimple from './pages/pets/PetsPage-simple.tsx'
-import { HealthPageReal as HealthPage } from './pages/health/HealthPageReal'
-import { HealthTrackingPage } from './pages/health/HealthTrackingPage'
+import DashboardPageSimple from '@/pages/dashboard/DashboardPage-simple'
+import PetsPageSimple from '@/pages/pets/PetsPage-simple'
+import { HealthPageReal as HealthPage } from '@/pages/health/HealthPageReal'
+import { HealthTrackingPage } from '@/pages/health/HealthTrackingPage'
 
 // Public Pages
-import LandingPageSimple from './pages/public/LandingPage-simple.tsx'
+import LandingPageSimple from '@/pages/public/LandingPage-simple'
 
 // Rename imports
 const LoginPage = LoginPageSimple
