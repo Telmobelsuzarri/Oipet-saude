@@ -23,9 +23,23 @@ app.use(express.urlencoded({ extended: true }));
 // MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || process.env.DATABASE_URL || 'mongodb://localhost:27017/oipet-saude';
 
-mongoose.connect(MONGODB_URI)
-  .then(() => console.log('✅ MongoDB Connected'))
-  .catch(err => console.error('❌ MongoDB Error:', err));
+console.log('🔧 Attempting MongoDB connection...');
+console.log('📍 MongoDB URI:', MONGODB_URI.replace(/:[^:]*@/, ':****@')); // Hide password in logs
+
+mongoose.connect(MONGODB_URI, {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 5000,
+  socketTimeoutMS: 45000,
+})
+  .then(() => {
+    console.log('✅ MongoDB Connected Successfully');
+    console.log('📊 Database:', mongoose.connection.db.databaseName);
+  })
+  .catch(err => {
+    console.error('❌ MongoDB Connection Error:', err.message);
+    console.error('🔍 Error details:', err);
+  });
 
 // Schemas
 const userSchema = new mongoose.Schema({
@@ -78,24 +92,48 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString(),
     environment: process.env.NODE_ENV || 'production',
     version: '1.0.0',
-    service: 'OiPet Saúde Backend Production'
+    service: 'OiPet Saúde Backend Production',
+    mongodb: {
+      connected: mongoose.connection.readyState === 1,
+      readyState: mongoose.connection.readyState,
+      host: mongoose.connection.host,
+      name: mongoose.connection.name
+    }
   });
 });
 
 // Auth Routes
 app.post('/api/auth/register', async (req, res) => {
+  console.log('📝 Register attempt:', { name: req.body.name, email: req.body.email });
+  
   try {
     const { name, email, password } = req.body;
     
+    // Validate input
+    if (!name || !email || !password) {
+      console.log('❌ Missing required fields');
+      return res.status(400).json({ error: 'All fields are required' });
+    }
+    
+    // Check MongoDB connection
+    if (mongoose.connection.readyState !== 1) {
+      console.log('❌ MongoDB not connected, state:', mongoose.connection.readyState);
+      return res.status(503).json({ error: 'Database unavailable' });
+    }
+    
+    console.log('🔍 Checking if user exists...');
     // Check if user exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
+      console.log('❌ User already exists');
       return res.status(400).json({ error: 'Email already registered' });
     }
 
+    console.log('🔐 Hashing password...');
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
+    console.log('👤 Creating user...');
     // Create user
     const user = new User({
       name,
@@ -104,6 +142,7 @@ app.post('/api/auth/register', async (req, res) => {
     });
 
     await user.save();
+    console.log('✅ User saved to database');
 
     // Generate token
     const token = jwt.sign(
@@ -123,8 +162,13 @@ app.post('/api/auth/register', async (req, res) => {
       }
     });
   } catch (error) {
-    console.error('Register error:', error);
-    res.status(500).json({ error: 'Server error' });
+    console.error('❌ Register error:', error.message);
+    console.error('Stack:', error.stack);
+    res.status(500).json({ 
+      error: 'Server error',
+      message: error.message,
+      details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 
