@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/index.ts",
     "build": "echo 'Production server ready'",
-    "start": "node server-production.js",
+    "start": "node railway-start.js",
     "start:dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "test": "jest",
     "test:watch": "jest --watch",
