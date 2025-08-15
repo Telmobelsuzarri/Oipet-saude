@@ -14,7 +14,26 @@ const PORT = process.env.PORT || 3001;
 
 // Middlewares
 app.use(cors({
-  origin: ['https://oipet-saude.vercel.app', 'http://localhost:3000'],
+  origin: function(origin, callback) {
+    // Permitir requisições sem origin (ex: Postman, apps mobile)
+    if (!origin) return callback(null, true);
+    
+    // Lista de origens permitidas
+    const allowedOrigins = [
+      'https://oipet-saude.vercel.app',
+      'https://web-mjc6w0xyg-telmo-belsuzarris-projects.vercel.app',
+      'https://web-3d4dyolzl-telmo-belsuzarris-projects.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5173'
+    ];
+    
+    // Permitir qualquer subdomínio do Vercel
+    if (origin.includes('.vercel.app') || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
