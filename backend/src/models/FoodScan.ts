@@ -12,6 +12,9 @@ export interface IFoodScan extends Document {
   imageHash?: string;
   recognizedFood?: string;
   barcode?: string;
+  alternatives?: string[];
+  safetyStatus?: 'safe' | 'toxic' | 'caution' | 'unknown';
+  safetyMessage?: string;
   nutritionalInfo?: {
     calories: number;
     protein: number;
@@ -86,6 +89,23 @@ const foodScanSchema = new Schema<IFoodScan>(
       index: true,
       sparse: true,
       match: [/^\d{8,14}$/, 'Código de barras deve ter entre 8 e 14 dígitos'],
+    },
+    alternatives: [{
+      type: String,
+      trim: true,
+      maxlength: [200, 'Alternativa não pode ter mais de 200 caracteres'],
+    }],
+    safetyStatus: {
+      type: String,
+      enum: {
+        values: ['safe', 'toxic', 'caution', 'unknown'],
+        message: 'Status deve ser: safe, toxic, caution ou unknown',
+      },
+    },
+    safetyMessage: {
+      type: String,
+      trim: true,
+      maxlength: [500, 'Mensagem de segurança não pode ter mais de 500 caracteres'],
     },
     nutritionalInfo: {
       calories: {

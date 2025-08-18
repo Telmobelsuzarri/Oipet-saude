@@ -46,6 +46,7 @@ import ecommerceAnalyticsRoutes from '@/routes/ecommerce-analytics';
 import uploadRoutes from '@/routes/upload';
 import monitoringRoutes from '@/routes/monitoring';
 import backupRoutes from '@/routes/backup';
+import foodScannerRoutes from '@/routes/food-scanner';
 
 // Debug removido - servidor funcionando!
 
@@ -104,6 +105,7 @@ app.use('/api/ecommerce-analytics', ecommerceAnalyticsRoutes);
 app.use('/api/upload', uploadRoutes);
 app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/backup', backupRoutes);
+app.use('/api/food-scanner', foodScannerRoutes);
 
 // Serve static uploads
 serveUploads(app);
