@@ -16,10 +16,22 @@ import 'express-async-errors';
 
 // Importações locais
 import { connectDatabase } from '@/config/database';
+import { connectRedis, disconnectRedis } from '@/config/redis';
 import { setupSwagger } from '@/config/swagger';
+import { serveUploads } from '@/config/storage';
 import { logger } from '@/utils/logger';
+import { MonitoringService } from '@/services/monitoringService';
+import { BackupService } from '@/services/backupService';
 import { errorHandler } from '@/middleware/errorHandler';
 import { notFound } from '@/middleware/notFound';
+import { 
+  securityHeaders, 
+  securityLogger, 
+  sanitizeInput,
+  corsSecurityOptions,
+  apiLimiter,
+  authLimiter 
+} from '@/middleware/security';
 
 // Rotas
 import authRoutes from '@/routes/auth';
@@ -31,48 +43,37 @@ import analyticsRoutes from '@/routes/analytics';
 import adminRoutes from '@/routes/admin';
 import productRoutes from '@/routes/products';
 import ecommerceAnalyticsRoutes from '@/routes/ecommerce-analytics';
+import uploadRoutes from '@/routes/upload';
+import monitoringRoutes from '@/routes/monitoring';
+import backupRoutes from '@/routes/backup';
 
 // Debug removido - servidor funcionando!
 
 const app = express();
 const PORT = parseInt(process.env.PORT || '3001', 10);
 
-// Middlewares de segurança
+// Security middleware (must be first)
+app.use(securityHeaders);
+app.use(securityLogger);
+
+// Enhanced helmet configuration
 app.use(helmet({
   crossOriginEmbedderPolicy: false,
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
+  hsts: {
+    maxAge: 31536000,
+    includeSubDomains: true,
+    preload: true
+  }
 }));
 
-// CORS
-const corsOptions = {
-  origin: process.env.CORS_ORIGIN?.split(',') || [
-    'http://localhost:3000',
-    'http://localhost:19006',
-    'https://oipet.netlify.app'
-  ],
-  credentials: true,
-  optionsSuccessStatus: 200,
-};
-app.use(cors(corsOptions));
+// Enhanced CORS with security
+app.use(cors(corsSecurityOptions));
 
-// Rate limiting
-const limiter = rateLimit({
-  windowMs: parseInt(process.env.RATE_LIMIT_WINDOW || '15') * 60 * 1000, // 15 minutos
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || '100'), // Limite de requests
-  message: {
-    error: 'Muitas tentativas, tente novamente em 15 minutos'
-  },
-  standardHeaders: true,
-  legacyHeaders: false,
-});
-app.use('/api', limiter);
+// Input sanitization
+app.use(sanitizeInput);
+
+// Rate limiting - general API
+app.use('/api', apiLimiter);
 
 // Middlewares básicos
 app.use(compression());
@@ -91,7 +92,7 @@ app.get('/health', (req, res) => {
 });
 
 // Rotas da API
-app.use('/api/auth', authRoutes);
+app.use('/api/auth', authLimiter, authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/pets', petRoutes);
 app.use('/api/health', healthRoutes);
@@ -100,6 +101,12 @@ app.use('/api/analytics', analyticsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/ecommerce-analytics', ecommerceAnalyticsRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/monitoring', monitoringRoutes);
+app.use('/api/backup', backupRoutes);
+
+// Serve static uploads
+serveUploads(app);
 
 // Documentação Swagger
 setupSwagger(app);
@@ -117,6 +124,16 @@ async function startServer() {
     await connectDatabase();
     logger.info('✅ Database connected successfully');
 
+    // Conectar ao Redis (opcional)
+    await connectRedis();
+    logger.info('✅ Redis connected successfully');
+
+    // Iniciar monitoramento
+    MonitoringService.startMonitoring(60000); // 1 minuto
+
+    // Inicializar sistema de backup
+    await BackupService.initialize();
+
     // Iniciar servidor
     const server = app.listen(PORT, () => {
       logger.info(`🚀 Server running on port ${PORT}`);
@@ -126,13 +143,23 @@ async function startServer() {
     });
 
     // Graceful shutdown
-    process.on('SIGTERM', () => {
-      logger.info('SIGTERM received, shutting down gracefully');
+    const gracefulShutdown = async (signal: string) => {
+      logger.info(`${signal} received, shutting down gracefully`);
+      
+      // Stop monitoring
+      await MonitoringService.handleShutdown(signal);
+      
+      // Disconnect Redis
+      await disconnectRedis();
+      
       server.close(() => {
         logger.info('Server closed');
         process.exit(0);
       });
-    });
+    };
+
+    process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+    process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
   } catch (error) {
     logger.error('❌ Failed to start server:', error);

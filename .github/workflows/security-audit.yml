@@ -1,0 +1,47 @@
+name: Security Audit
+
+on:
+  schedule:
+    - cron: '0 2 * * 1' # Segunda-feira às 2h
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  security-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Backend Security Audit
+        run: |
+          cd backend
+          npm audit --audit-level high
+          
+      - name: Web Security Audit
+        run: |
+          cd web
+          npm audit --audit-level high
+
+      - name: Check for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+          extra_args: --debug --only-verified
+
+      - name: SAST Analysis
+        uses: github/super-linter@v4
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_TYPESCRIPT_ES: true
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_JSON: true

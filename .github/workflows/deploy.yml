@@ -1,0 +1,95 @@
+name: Deploy to Railway
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+          cache-dependency-path: |
+            backend/package-lock.json
+            web/package-lock.json
+
+      - name: Install backend dependencies
+        run: |
+          cd backend
+          npm ci
+
+      - name: Install web dependencies
+        run: |
+          cd web
+          npm ci
+
+      - name: Run backend tests
+        run: |
+          cd backend
+          npm run test
+
+      - name: Run backend linting
+        run: |
+          cd backend
+          npm run lint
+
+      - name: Build backend
+        run: |
+          cd backend
+          npm run build
+
+      - name: Build web
+        run: |
+          cd web
+          npm run build
+
+  deploy-staging:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/develop'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Railway (Staging)
+        uses: bervProject/railway-deploy@v1.0.0
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN_STAGING }}
+          service: 'oipet-saude-backend-staging'
+
+  deploy-production:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Deploy to Railway (Production)
+        uses: bervProject/railway-deploy@v1.0.0
+        with:
+          railway_token: ${{ secrets.RAILWAY_TOKEN }}
+          service: 'oipet-saude-backend'
+
+      - name: Health Check
+        run: |
+          sleep 30
+          curl -f https://oipet-saude-production.up.railway.app/health || exit 1
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deploy realizado com sucesso!"
+          echo "🌐 URL: https://oipet-saude-production.up.railway.app"
