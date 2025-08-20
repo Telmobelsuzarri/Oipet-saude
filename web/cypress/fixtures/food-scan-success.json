@@ -1,0 +1,30 @@
+{
+  "success": true,
+  "data": {
+    "food": "Ração Premium para Cães Adultos",
+    "confidence": 0.92,
+    "alternatives": [
+      {
+        "name": "Ração Standard para Cães",
+        "confidence": 0.78
+      },
+      {
+        "name": "Ração Super Premium",
+        "confidence": 0.65
+      }
+    ],
+    "nutritionalInfo": {
+      "calories": 380,
+      "protein": 28.5,
+      "carbs": 42.0,
+      "fat": 12.5,
+      "fiber": 4.0,
+      "calcium": 1.2,
+      "phosphorus": 1.0
+    },
+    "safetyStatus": "safe",
+    "safetyMessage": "Alimento adequado para cães adultos",
+    "imageUrl": "/uploads/scans/food-scan-123.jpg",
+    "scanId": "scan-123456789"
+  }
+}

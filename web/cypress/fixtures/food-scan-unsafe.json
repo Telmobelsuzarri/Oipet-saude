@@ -1,0 +1,29 @@
+{
+  "success": true,
+  "data": {
+    "food": "Chocolate",
+    "confidence": 0.95,
+    "alternatives": [
+      {
+        "name": "Cacau",
+        "confidence": 0.88
+      },
+      {
+        "name": "Chocolate Amargo",
+        "confidence": 0.82
+      }
+    ],
+    "nutritionalInfo": {
+      "calories": 546,
+      "protein": 7.9,
+      "carbs": 59.4,
+      "fat": 31.3,
+      "fiber": 7.0,
+      "sugar": 47.9
+    },
+    "safetyStatus": "dangerous",
+    "safetyMessage": "Este alimento pode ser prejudicial para pets. Chocolate contém teobromina, que é tóxica para cães e gatos.",
+    "imageUrl": "/uploads/scans/food-scan-124.jpg",
+    "scanId": "scan-123456790"
+  }
+}

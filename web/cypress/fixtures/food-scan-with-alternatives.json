@@ -1,0 +1,34 @@
+{
+  "success": true,
+  "data": {
+    "food": "Ração Natural para Cães",
+    "confidence": 0.75,
+    "alternatives": [
+      {
+        "name": "Ração Premium para Cães Adultos",
+        "confidence": 0.85
+      },
+      {
+        "name": "Ração Grain Free",
+        "confidence": 0.72
+      },
+      {
+        "name": "Ração Orgânica",
+        "confidence": 0.68
+      }
+    ],
+    "nutritionalInfo": {
+      "calories": 365,
+      "protein": 32.0,
+      "carbs": 38.5,
+      "fat": 14.0,
+      "fiber": 5.5,
+      "omega3": 0.8,
+      "omega6": 2.1
+    },
+    "safetyStatus": "safe",
+    "safetyMessage": "Alimento natural e saudável para cães",
+    "imageUrl": "/uploads/scans/food-scan-125.jpg",
+    "scanId": "scan-123456791"
+  }
+}

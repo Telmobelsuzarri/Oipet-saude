@@ -47,6 +47,8 @@ import uploadRoutes from '@/routes/upload';
 import monitoringRoutes from '@/routes/monitoring';
 import backupRoutes from '@/routes/backup';
 import foodScannerRoutes from '@/routes/food-scanner';
+import wishlistRoutes from '@/routes/wishlist';
+import deepLinksRoutes from '@/routes/deep-links';
 
 // Debug removido - servidor funcionando!
 
@@ -106,6 +108,8 @@ app.use('/api/upload', uploadRoutes);
 app.use('/api/monitoring', monitoringRoutes);
 app.use('/api/backup', backupRoutes);
 app.use('/api/food-scanner', foodScannerRoutes);
+app.use('/api/wishlist', wishlistRoutes);
+app.use('/api/deep-links', deepLinksRoutes);
 
 // Serve static uploads
 serveUploads(app);
